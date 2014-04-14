@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="{{ cosmo.language }}">
+<head>
+    <base href="{{ cosmo.mainConfig.basePath }}">
+    <link href="favicon.ico" rel="shortcut icon">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="{{ cosmo.themeFolder }}/css/main.css" type="text/css" rel="stylesheet" media="screen">
+    <title>{{ config.title }}</title>
+</head>
+<body>
+<div class="header">
+    <span class="logo">Cosmo</span>
+
+    <div class="wgt-search">
+        <input type="search" class="wgt-search-box" placeholder="{{ lang.searchPlaceholder }}">
+    </div>
+
+    <div class="wgt-language">
+        {{ cosmo.languageWidget() }}
+    </div>
+</div>
+
+<div class="body">
+    <div class="navigation">
+        {% set pages = cosmo.getPages() %}
+        {% if pages|length %}
+            <div class="navigationBlock">
+                <h3>{{ lang.navigationHeadlinePages }}</h3>
+                <ul>
+                    {% for page in pages %}
+                        <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% set pages = cosmo.getArticles() %}
+        {% if pages|length %}
+            <div class="navigationBlock">
+                <h3>{{ lang.navigationHeadlineArticles }}</h3>
+                <ul>
+                    {% for page in pages %}
+                        <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% set pages = cosmo.getReferences() %}
+        {% if pages|length %}
+            <div class="navigationBlock">
+                <h3>{{ lang.navigationHeadlineReferences }}</h3>
+                <ul>
+                    {% for page in pages %}
+                        <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+    <div class="content">
+        {{ cosmo.content|raw }}
+    </div>
+</div>
+
+<div class="footer">
+    Made with cosmo
+</div>
+</body>
+</html>
