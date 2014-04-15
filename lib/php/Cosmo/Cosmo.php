@@ -32,6 +32,11 @@ class Cosmo {
     var $requestParams;
 
     /**
+     * @var {String} The current request url.
+     */
+    var $requestURL;
+
+    /**
      * @var string Path of the current content file.
      */
     private $contentPath = '';
@@ -52,6 +57,8 @@ class Cosmo {
         } else {
             $this->requestParams = array();
         }
+
+        $this->requestURL = implode('/', $this->requestParams);
 
         /*
          * A URL request always consists from:

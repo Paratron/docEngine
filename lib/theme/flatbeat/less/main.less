@@ -1,0 +1,73 @@
+body {
+    background: #f5f5f5;
+    margin: 0;
+    padding: 0;
+    font-family: 'ABeeZee', Arial, Helvetica;
+}
+
+.header, .footer {
+    background: #fff;
+    padding: 20px;
+}
+
+.logo {
+    font-family: 'Source Code Pro', Arial, Helvetica;
+    font-size: 40px;
+    font-weight: 200;
+}
+
+.body {
+    padding: 20px;
+
+    .navigation {
+        float: left;
+        width: 300px;
+        background: #fff;
+
+        h3{
+            padding-left: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+
+            li {
+                a {
+                    display: block;
+                    padding: 10px;
+                    padding-left: 20px;
+                    color: #333;
+                    text-decoration: none;
+
+                    &:hover {
+                        background: #eef;
+                    }
+                }
+            }
+
+            .active{
+                a{
+                    border-left: #ddf solid 5px;
+                    padding-left: 15px;
+                }
+            }
+        }
+    }
+
+    .content {
+        margin-left: 340px;
+    }
+}
+
+pre {
+    background: #fff;
+    border-radius: 5px;
+    padding: 5px;
+
+}
+
+code {
+    font-family: 'Source Code Pro', Arial, Helvetica;
+    font-size: 12px;
+}

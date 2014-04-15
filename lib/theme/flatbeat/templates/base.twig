@@ -7,16 +7,13 @@
     <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+    <link href='http://fonts.googleapis.com/css?family=ABeeZee|Source+Code+Pro:200,400' rel='stylesheet' type='text/css'>
     <link href="{{ cosmo.themeFolder }}/css/main.css" type="text/css" rel="stylesheet" media="screen">
     <title>{{ config.title }}</title>
 </head>
 <body>
 <div class="header">
-    <span class="logo">Cosmo</span>
-
-    <div class="wgt-search">
-        <input type="search" class="wgt-search-box" placeholder="{{ lang.searchPlaceholder }}">
-    </div>
+    <span class="logo">{{ cosmo.mainConfig.title }}</span>
 
     <div class="wgt-language">
         {{ cosmo.languageWidget() }}
@@ -31,7 +28,7 @@
                 <h3>{{ lang.navigationHeadlinePages }}</h3>
                 <ul>
                     {% for page in pages %}
-                        <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+                        <li{% if cosmo.requestURL == page.url %} class="active"{% endif %}><a href="{{ page.url }}">{{ page.title }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
@@ -43,7 +40,7 @@
                 <h3>{{ lang.navigationHeadlineArticles }}</h3>
                 <ul>
                     {% for page in pages %}
-                        <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+                        <li{% if cosmo.requestURL == page.url %} class="active"{% endif %}><a href="{{ page.url }}">{{ page.title }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
@@ -55,7 +52,7 @@
                 <h3>{{ lang.navigationHeadlineReferences }}</h3>
                 <ul>
                     {% for page in pages %}
-                        <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+                        <li{% if cosmo.requestURL == page.url %} class="active"{% endif %}><a href="{{ page.url }}">{{ page.title }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
