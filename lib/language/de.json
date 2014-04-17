@@ -1,5 +1,6 @@
 {
     "searchPlaceholder": "Search in documentation",
+    "changeLanguage": "Sprache wechseln",
     "languages": {
         "en": "English",
         "de": "Deutsch"

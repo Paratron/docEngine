@@ -122,7 +122,28 @@ class Cosmo {
 
         $this->contentPath = $page['filePath'];
         $this->localConfig = $page['config'];
+
+        if ($page['type'] === 'page') {
+            $dynFileName = preg_replace('#\.md$#', '.php', $page['filePath']);
+            if (file_exists($dynFileName)) {
+                $vars = array();
+                $this->sandbox($dynFileName, $vars);
+                $loader = new \Twig_Loader_String();
+                $twig = new \Twig_Environment($loader, array(
+                        'cache' => $this->mainConfig->cache ? '/lib/cache' : NULL,
+                ));
+
+                $content = $twig->render(file_get_contents($this->contentPath), array('vars' => $vars));
+                $this->content = $this->parse($content);
+                return;
+            }
+        }
+
         $this->content = $this->parse(file_get_contents($this->contentPath));
+    }
+
+    private function sandbox($dynFileName, &$vars) {
+        include $dynFileName;
     }
 
     private function getPageByURL($url) {
@@ -192,9 +213,10 @@ class Cosmo {
             $f = explode('/', $f);
             $f[3] = explode('.', $f[3]);
             $f[3] = explode('_', $f[3][0]);
-            if(is_numeric($f[3][0])){
+            if (is_numeric($f[3][0])) {
                 $structObj['sortOrder'] = $f[3][0];
-            } else {
+            }
+            else {
                 $structObj['sortOrder'] = -1;
             }
             $f[3] = array_pop($f[3]);
@@ -308,11 +330,11 @@ class Cosmo {
     function getPageList($type) {
         $out = array();
 
-        foreach($this->fileStructure as $f){
-            if($f['type'] === $type && $f['lang'] === $this->language){
+        foreach ($this->fileStructure as $f) {
+            if ($f['type'] === $type && $f['lang'] === $this->language) {
                 $out[] = array(
-                    'url' => $f['url'],
-                    'title' => $f['config']['title']
+                        'url' => $f['url'],
+                        'title' => $f['config']['title']
                 );
             }
         }
@@ -349,15 +371,15 @@ class Cosmo {
 
         if (isset($this->localConfig['key'])) {
             $refKey = $this->requestParams[0] . '_' . $this->localConfig['key'];
-            if(isset($this->keyFileStructureReference[$refKey])){
-                foreach($this->keyFileStructureReference[$refKey] as $refIndex){
+            if (isset($this->keyFileStructureReference[$refKey])) {
+                foreach ($this->keyFileStructureReference[$refKey] as $refIndex) {
                     $f = $this->fileStructure[$refIndex];
                     $wgt['availableLanguages'][] = array(
-                        'url' => $f['url'],
-                        'isoCode' => $f['lang'],
-                        'name' => $this->globalLanguage['languages'][$f['lang']],
-                        'pageTitle' => $f['title'],
-                        'active' => $this->language === $f['lang']
+                            'url' => $f['url'],
+                            'isoCode' => $f['lang'],
+                            'name' => $this->globalLanguage['languages'][$f['lang']],
+                            'pageTitle' => $f['title'],
+                            'active' => $this->language === $f['lang']
                     );
                 }
             }
@@ -365,7 +387,10 @@ class Cosmo {
 
 
         global $twig;
-        return $twig->render('wgt-language.twig', array('wgt' => $wgt));
+        return $twig->render('wgt-language.twig', array(
+                'wgt' => $wgt,
+                'lang' => $this->readLanguage()
+        ));
     }
 }
  
