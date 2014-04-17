@@ -5,9 +5,19 @@ body {
     font-family: 'ABeeZee', Arial, Helvetica;
 }
 
+.wrap, .body{
+    width: 960px;
+    margin: 0 auto;
+}
+
+.wrap{
+    position: relative;
+}
+
 .header, .footer {
     background: #fff;
     padding: 20px;
+    clear: left;
 }
 
 .logo {
@@ -24,7 +34,7 @@ body {
         width: 300px;
         background: #fff;
 
-        h3{
+        h3 {
             padding-left: 20px;
         }
 
@@ -46,8 +56,8 @@ body {
                 }
             }
 
-            .active{
-                a{
+            .active {
+                a {
                     border-left: #ddf solid 5px;
                     padding-left: 15px;
                 }
@@ -70,4 +80,61 @@ pre {
 code {
     font-family: 'Source Code Pro', Arial, Helvetica;
     font-size: 12px;
+}
+
+.wgt-language {
+    position: absolute;
+    top: 0;
+    right: 20px;
+    height: 40px;
+
+    .available-languages {
+        display: none;
+        position: absolute;
+        top: 35px;
+        right: 0;
+        background: #fff;
+        border: #333 solid 1px;
+
+        &:hover{
+            display: block;
+        }
+
+        a{
+            display: block;
+            padding: 5px;
+            color: #333;
+            text-decoration: none;
+            padding-left: 24px;
+            background: 4px center no-repeat;
+
+            &:hover{
+                background-color: #eee;
+            }
+        }
+    }
+
+    button {
+        border: #333 solid 1px;
+        border-radius: 5px;
+        font-size: 0;
+        width: 50px;
+        height: 40px;
+        display: block;
+        cursor: pointer;
+        background: #fff center no-repeat;
+        outline: none;
+
+        &:hover {
+            background-color: #eee;
+        }
+
+        &:focus{
+            background-color: #eee;
+
+            & + .available-languages {
+                display: block;
+            }
+        }
+    }
 }

@@ -1,10 +1,10 @@
 {
-    "searchPlaceholder": "Search in documentation",
+    "searchPlaceholder": "Dokumentation durchsuchen",
     "languages": {
         "en": "English",
         "de": "Deutsch"
     },
-    "navigationHeadlinePages": "Pages",
-    "navigationHeadlineArticles": "Articles",
-    "navigationHeadlineReferences": "Reference"
+    "navigationHeadlinePages": "Seiten",
+    "navigationHeadlineArticles": "Artikel",
+    "navigationHeadlineReferences": "Referenz"
 }

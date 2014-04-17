@@ -12,6 +12,16 @@ namespace Cosmo;
 
 class Cosmo {
     /**
+     * @var Array Contains an array of all available pages.
+     */
+    private $fileStructure = array();
+
+    /**
+     * @var Array Contains quick links if you search for language variations by key.
+     */
+    private $keyFileStructureReference = array();
+
+    /**
      * @var {Object} $mainConfig Contains the cosmo config data.
      */
     var $mainConfig;
@@ -46,15 +56,24 @@ class Cosmo {
      */
     var $content = '';
 
+    /**
+     * Cache for global language strings fetched by readLanguage();
+     * @var null
+     */
+    var $globalLanguage = NULL;
+
     function __construct() {
         //First, lets read the cosmo config.
         $this->mainConfig = json_decode(file_get_contents('docs/cosmo_config.json'));
 
+        $this->readFileStructure();
+
         $this->themeFolder = 'lib/theme/' . $this->mainConfig->theme;
-        if(isset($_SERVER['PATH_INFO'])){
+        if (isset($_SERVER['PATH_INFO'])) {
             $this->requestParams = explode('/', $_SERVER['PATH_INFO']);
             array_shift($this->requestParams);
-        } else {
+        }
+        else {
             $this->requestParams = array();
         }
 
@@ -70,39 +89,61 @@ class Cosmo {
         if ($pCount > 0 && $pCount < 3) {
             //One or no Param - assumes language to be not given
             $this->language = $this->mainConfig->defaultLanguage;
-            $last = array_pop($this->requestParams);
-            $path = glob('docs/{articles,pages,reference}/*/*' . $last . '.md', GLOB_BRACE);
+            $last = $this->requestParams[$pCount - 1];
 
-            if (!count($path)) {
+            $page = NULL;
+
+            if (!($page = $this->getPageByURL(implode('/', array(
+                    $this->requestParams[0],
+                    $this->language,
+                    $last
+            ))))
+            ) {
                 header('location: ' . $this->mainConfig->basePath . $this->mainConfig->homepage);
                 die();
             }
 
-            $lang = explode('/', $path[0]);
-            $lang = $lang[2];
+            $lang = $page['lang'];
             header('location: ' . $this->mainConfig->basePath . $this->requestParams[0] . '/' . $lang . '/' . $last);
             die();
         }
-        else if($pCount > 0){
-            $this->language = strtolower(substr($this->requestParams[1], 0, 2));
-            $path = glob('docs/{articles,pages,reference}/*/*' . $this->requestParams[2] . '.md', GLOB_BRACE);
+        else {
+            if ($pCount > 0) {
+                $this->language = strtolower(substr($this->requestParams[1], 0, 2));
+                $page = $this->getPageByURL($this->requestURL);
+            }
         }
 
 
-        if (!count($path)) {
+        if (!$page) {
             header('location: ' . $this->mainConfig->basePath . $this->mainConfig->homepage);
             die();
         }
 
-        $this->contentPath = $path[0];
-        $this->content = $this->parse(file_get_contents($path[0]));
+        $this->contentPath = $page['filePath'];
+        $this->localConfig = $page['config'];
+        $this->content = $this->parse(file_get_contents($this->contentPath));
+    }
+
+    private function getPageByURL($url) {
+        foreach ($this->fileStructure as $f) {
+            if ($f['url'] == $url) {
+                return $f;
+            }
+        }
+
+        return NULL;
     }
 
     /**
      * Returns the contents of the current main language file.
      */
     function readLanguage() {
-        return json_decode(file_get_contents('lib/language/' . $this->language . '.json'), TRUE);
+        if ($this->globalLanguage === NULL) {
+            $this->globalLanguage = json_decode(file_get_contents('lib/language/' . $this->language . '.json'), TRUE);
+        }
+
+        return $this->globalLanguage;
     }
 
     /**
@@ -113,7 +154,6 @@ class Cosmo {
         require_once 'lib/php/Michelf/Markdown.inc.php';
 
         $result = $this->readJSONBlock($content, 'conf');
-        $this->localConfig = $result['json'];
         $this->stripJSONBlock($content, $result);
 
         $content = \Michelf\Markdown::defaultTransform($content);
@@ -121,31 +161,129 @@ class Cosmo {
         return $content;
     }
 
-    private function readJSONBlock($content, $blockTag) {
+    private function readJSONBlock($content, $blockTag, $assoc = FALSE) {
         $start = strpos($content, $blockTag . ':{');
         $end = strpos($content, '}:' . $blockTag, $start);
-        $content = substr($content, $start + strlen($blockTag) + 1, $end - ($start + strlen($blockTag)));
+        $content = substr($content, $start + strlen($blockTag) - 1, $end - ($start + strlen($blockTag) + 1));
 
         $result = array(
                 'tag' => $blockTag,
                 'start' => $start,
                 'end' => $end,
-                'json' => json_decode($content)
+                'json' => json_decode($content, $assoc)
         );
 
         return $result;
     }
 
-    /**
-     * Reads the title attribute from the config block.
-     * @param $content
-     * @return string
-     */
-    private function readTitle($content) {
-        $start = strpos($content, '"title"');
+    function readFileStructure() {
+        $files = glob('docs/{articles,pages,reference}/*/*.md', GLOB_BRACE);
+
+        $struct = array();
+        $keyStructRef = array();
+
+        foreach ($files as $f) {
+            $structObj = array();
+
+            $fConfig = $this->readConfigFromFile($f);
+            $structObj['config'] = $fConfig['json'];
+
+            $structObj['filePath'] = $f;
+            $f = explode('/', $f);
+            $f[3] = explode('.', $f[3]);
+            $f[3] = explode('_', $f[3][0]);
+            if(is_numeric($f[3][0])){
+                $structObj['sortOrder'] = $f[3][0];
+            } else {
+                $structObj['sortOrder'] = -1;
+            }
+            $f[3] = array_pop($f[3]);
+
+            if ($f[1] !== 'reference') {
+                $f[1] = substr($f[1], 0, -1);
+            }
+
+            $structObj['type'] = $f[1];
+
+            if (isset($structObj['config']['key'])) {
+                $key = $structObj['config']['key'];
+                if (!isset($keyStructRef[$f[1] . '_' . $key])) {
+                    $keyStructRef[$f[1] . '_' . $key] = array();
+                }
+                $structObj['key'] = $key;
+                $keyStructRef[$f[1] . '_' . $key][] = count($struct);
+            }
+            else {
+                $structObj['key'] = NULL;
+            }
+            $structObj['title'] = $structObj['config']['title'];
+            $structObj['lang'] = $f[2];
+            $structObj['url'] = $f[1] . '/' . $f[2] . '/' . $f[3];
+            $struct[] = $structObj;
+        }
+
+        $this->fileStructure = $struct;
+        $this->keyFileStructureReference = $keyStructRef;
+    }
+
+    private function readConfigFromFile($fileName) {
+        if (!file_exists($fileName)) {
+            throw new \ErrorException('File not found');
+        }
+
+        $f = fopen($fileName, 'r');
+        $inConfigBlock = FALSE;
+        $buffer = '';
+
+
+        while ($line = fgets($f)) {
+            if (strpos($line, '}:conf') !== FALSE) {
+                $buffer .= $line;
+                break;
+            }
+
+            if (strpos($line, 'conf:{') !== FALSE) {
+                $inConfigBlock = TRUE;
+                $buffer .= $line;
+                continue;
+            }
+
+            if ($inConfigBlock) {
+                $buffer .= $line;
+            }
+        }
+
+        fclose($f);
+
+        return $this->readJSONBlock($buffer, 'config', TRUE);
+    }
+
+    private function readConfigValueFromFile($fileName, $valueNames) {
+        if (!is_array($valueNames)) {
+            $valueNames = array($valueNames);
+        }
+
+        $out = array();
+
+        $config = $this->readConfigFromFile($fileName);
+
+        foreach ($valueNames as $v) {
+            if (isset($config[$v])) {
+                $out[$v] = $config[$v];
+            }
+            else {
+                $out[$v] = NULL;
+            }
+        }
+
+        return $out;
+    }
+
+    private function quickReadConfigValue($content, $valueName) {
+        $start = strpos($content, '"' . $valueName . '"');
 
         $stringStart = 0;
-        for ($i = $start + 7; $i < 100; $i++) {
+        for ($i = $start + strlen($valueName) + 2; $i < 100; $i++) {
             if (substr($content, $i, 1) === '"' && substr($content, $i - 1, 1) !== '\\') {
                 if (!$stringStart) {
                     $stringStart = $i;
@@ -157,7 +295,7 @@ class Cosmo {
         }
 
         if (!$stringStart) {
-            throw new \ErrorException('No title definition found');
+            throw new \ErrorException('Config Value not found');
         }
 
         return substr($content, $stringStart + 1, $i - $stringStart - 1);
@@ -168,35 +306,15 @@ class Cosmo {
     }
 
     function getPageList($type) {
-        switch($type){
-            case 'page':
-                $p1 = 'pages';
-                $p2 = 'page';
-                break;
-            case 'article':
-                $p1 = 'articles';
-                $p2 = 'article';
-                break;
-            case 'reference':
-                $p1 = $p2 = 'reference';
-        }
-
-        $pages = glob('docs/' . $p1 . '/' . $this->language . '/*.md');
         $out = array();
 
-        foreach ($pages as $v) {
-            $key = explode('/', $v);
-            $key = explode('.md', array_pop($key));
-            $key = explode('_', $key[0]);
-            if (is_numeric($key[0])) {
-                array_shift($key);
+        foreach($this->fileStructure as $f){
+            if($f['type'] === $type && $f['lang'] === $this->language){
+                $out[] = array(
+                    'url' => $f['url'],
+                    'title' => $f['config']['title']
+                );
             }
-            $key = implode('_', $key);
-
-            $out[] = array(
-                    'url' => $p2 . '/' . $this->language . '/' . $key,
-                    'title' => $this->readTitle(file_get_contents($v))
-            );
         }
 
         return $out;
@@ -209,12 +327,45 @@ class Cosmo {
         return $this->getPageList('page');
     }
 
-    function getArticles(){
+    function getArticles() {
         return $this->getPageList('article');
     }
 
-    function getReferences(){
+    function getReferences() {
         return $this->getPageList('reference');
+    }
+
+    function renderLanguageWidget() {
+        $this->readLanguage();
+
+        $wgt = array(
+                'currentLanguage' => array(
+                        'isoCode' => $this->language,
+                        'name' => $this->globalLanguage['languages'][$this->language],
+                        'url' => $this->requestURL
+                ),
+                'availableLanguages' => array()
+        );
+
+        if (isset($this->localConfig['key'])) {
+            $refKey = $this->requestParams[0] . '_' . $this->localConfig['key'];
+            if(isset($this->keyFileStructureReference[$refKey])){
+                foreach($this->keyFileStructureReference[$refKey] as $refIndex){
+                    $f = $this->fileStructure[$refIndex];
+                    $wgt['availableLanguages'][] = array(
+                        'url' => $f['url'],
+                        'isoCode' => $f['lang'],
+                        'name' => $this->globalLanguage['languages'][$f['lang']],
+                        'pageTitle' => $f['title'],
+                        'active' => $this->language === $f['lang']
+                    );
+                }
+            }
+        }
+
+
+        global $twig;
+        return $twig->render('wgt-language.twig', array('wgt' => $wgt));
     }
 }
  

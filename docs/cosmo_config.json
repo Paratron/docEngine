@@ -1,0 +1,10 @@
+{
+    "title": "Cosmo",
+    "version": "0.1.0",
+    "basePath": "/cosmo/src/",
+    "homepage": "page/home",
+    "cache": false,
+    "theme": "flatbeat",
+    "defaultLanguage": "en",
+    "disqus": true
+}
