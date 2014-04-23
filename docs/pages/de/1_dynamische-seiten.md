@@ -3,8 +3,7 @@ conf:{
     "title": "Dynamische Seiten"
 }:conf
 
-Dynamische Seiten
-=================
+#Dynamische Seiten
 
 Während Artikel aus komplett statischen Markdown Dateien generiert wird, können Seiten mit Twig Statements
 gemischt werden, um sie zu dynamisieren.
@@ -22,4 +21,4 @@ Es liegt ganz bei Ihnen.
 
 Ein kleines Beispiel. Die Variable `time` wird in PHP gesetzt:
 
-    The current server time is: {{ vars.time }}
+    Die aktuelle Serverzeit ist: {{ vars.time }}

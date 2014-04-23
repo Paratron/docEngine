@@ -3,8 +3,7 @@ conf:{
     "title": "Welcome"
 }:conf
 
-Introducing Cosmo
------------------
+#Introducing Cosmo
 
 Cosmo is a PHP based documentation engine that enables you to write your documentation in markdown files.
 

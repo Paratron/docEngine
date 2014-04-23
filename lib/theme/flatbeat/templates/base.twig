@@ -7,10 +7,17 @@
     <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <link href='http://fonts.googleapis.com/css?family=ABeeZee|Source+Code+Pro:200,400' rel='stylesheet'
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:700,400,300|Source+Code+Pro:200,400' rel='stylesheet'
           type='text/css'>
     <link href="{{ cosmo.themeFolder }}/css/main.css" type="text/css" rel="stylesheet" media="screen">
-    <title>{{ config.title }}</title>
+    {% for file in cosmo.cssFiles %}
+        <link href="{% if file.local %}{{ cosmo.themeFolder }}/css/{{ file.url }}{% else %}{{ file.url }}{% endif %}"
+              type="text/css" rel="stylesheet" media="{{ file.media }}">
+    {% endfor %}
+    <title>Cosmo - {{ config.title }}</title>
+    {% for file in cosmo.headerJavaScriptFiles %}
+        <script type="text/javascript" src="{% if file.local %}{{ cosmo.themeFolder }}/js/{{ file.url }}{% else %}{{ file.url }}{% endif %}"></script>
+    {% endfor %}
 </head>
 <body>
 <div class="header">
@@ -18,58 +25,62 @@
         <span class="logo">{{ cosmo.mainConfig.title }}</span>
         {% if cosmo.mainConfig.version %}<span class="version">v {{ cosmo.mainConfig.version }}</span>{% endif %}
 
+        {{ cosmo.callHook("renderHeader", "")|raw }}
+
         {{ cosmo.renderLanguageWidget()|raw }}
     </div>
 </div>
 
-<div class="body">
-    <div class="navigation">
-        {% set pages = cosmo.getPages() %}
-        {% if pages|length %}
-            <div class="navigationBlock">
-                <ul>
-                    {% for page in pages %}
-                        <li{% if cosmo.requestURL == page.url %} class="active"{% endif %}><a
-                                    href="{{ page.url }}">{{ page.title }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
+<div class="bodywrap">
+    <div class="body">
+        <div class="navigation">
+            {% set pages = cosmo.getPages() %}
+            {% if pages|length %}
+                <div class="navigationBlock">
+                    <ul>
+                        {% for page in pages %}
+                            <li{% if cosmo.requestURL == page.url %} class="active"{% endif %}><a
+                                        href="{{ page.url }}">{{ page.title }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
 
-        {% set pages = cosmo.getArticles() %}
-        {% if pages|length %}
-            <div class="navigationBlock">
-                <h3>{{ lang.navigationHeadlineArticles }}</h3>
-                <ul>
-                    {% for page in pages %}
-                        <li{% if cosmo.requestURL == page.url %} class="active"{% endif %}><a
-                                    href="{{ page.url }}">{{ page.title }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
+            {% set pages = cosmo.getArticles() %}
+            {% if pages|length %}
+                <div class="navigationBlock">
+                    <h3>{{ lang.navigationHeadlineArticles }}</h3>
+                    <ul>
+                        {% for page in pages %}
+                            <li{% if cosmo.requestURL == page.url %} class="active"{% endif %}><a
+                                        href="{{ page.url }}">{{ page.title }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
 
-        {% set pages = cosmo.getReferences() %}
-        {% if pages|length %}
-            <div class="navigationBlock">
-                <h3>{{ lang.navigationHeadlineReferences }}</h3>
-                <ul>
-                    {% for page in pages %}
-                        <li{% if cosmo.requestURL == page.url %} class="active"{% endif %}><a
-                                    href="{{ page.url }}">{{ page.title }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-    </div>
-    <div class="content">
-        {{ cosmo.content|raw }}
+            {% set pages = cosmo.getReferences() %}
+            {% if pages|length %}
+                <div class="navigationBlock">
+                    <h3>{{ lang.navigationHeadlineReferences }}</h3>
+                    <ul>
+                        {% for page in pages %}
+                            <li{% if cosmo.requestURL == page.url %} class="active"{% endif %}><a
+                                        href="{{ page.url }}">{{ page.title }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+        <div class="content">
+            {{ cosmo.content|raw }}
+        </div>
     </div>
 </div>
 
 <div class="footer">
     <div class="wrap">
-        Made with cosmo
+        Made with <a href="http://github.com/paratron/cosmo">cosmo</a>
     </div>
 </div>
 </body>

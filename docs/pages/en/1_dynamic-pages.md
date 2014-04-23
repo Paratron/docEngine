@@ -1,10 +1,14 @@
 conf:{
     "key": "dynamic",
-    "title": "Dynamic Pages"
+    "title": "Dynamic Pages",
+    "modules": {
+        "PrettifySources": {
+            "active": false
+        }
+    }
 }:conf
 
-Dynamic Pages
-=============
+#Dynamic Pages
 
 While articles are generated from purely static markdown files, pages can be mixed with twig statements
 to make them dynamic.

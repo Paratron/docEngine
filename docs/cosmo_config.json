@@ -1,10 +1,16 @@
 {
     "title": "Cosmo",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "basePath": "/cosmo/src/",
     "homepage": "page/home",
     "cache": false,
     "theme": "flatbeat",
     "defaultLanguage": "en",
-    "disqus": true
+    "disqus": true,
+    "modules": {
+        "PrettifySources": {
+            "skin": "desert",
+            "linenums": false
+        }
+    }
 }
