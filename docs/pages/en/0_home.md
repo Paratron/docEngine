@@ -15,3 +15,5 @@ The current feature set includes:
 - Clean, search engine friendly URLs
 - Configuration via JSON (a global JSON file + inline JSON config per markdown file)
 - Theme-ability (themes utilize the powerful [Twig templating engine](http://twig.sensiolabs.org/))
+- Custom modules
+- Embedded, interactive demos

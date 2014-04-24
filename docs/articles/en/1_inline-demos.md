@@ -29,7 +29,7 @@ demo:{
         "demo.css",
         "demo.js"
     ],
-    "editable": true
+    "editable": false
 }:demo
 
 To embed a inline demo into your markdown element, you simply use a JSON block inside

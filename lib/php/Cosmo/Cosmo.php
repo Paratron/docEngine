@@ -123,6 +123,19 @@ class Cosmo {
 
         $page = NULL;
 
+        //Maybe a module request?
+        if($pCount > 0 && $this->requestParams[0] == 'module'){
+            $hookName = $this->requestParams[1];
+            $moduleParams = $this->requestParams;
+            array_shift($moduleParams);
+            array_shift($moduleParams);
+            array_pop($moduleParams);
+
+            $this->callHook('module:' . $hookName, $moduleParams);
+
+            die();
+        }
+
         //Language parameter missing?
         if ($pCount > 0 && $pCount < 3) {
             //One or no Param - assumes language to be not given

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base href="{{ basePath }}">
+    <link href="favicon.ico" rel="shortcut icon">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="{{ themeFolder }}/css/inlineDemo.css" type="text/css" rel="stylesheet" media="screen">
+    <title>Cosmo inline demo</title>
+</head>
+<body>
+<script>
+    var editable = {{ editable }};
+    var demoTarget = '{{ target }}';
+    var files = {{ files }};
+</script>
+{{ fileData }}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="{{ themeFolder }}/js/modules/inlineDemo/underscore-min.js"></script>
+<script src="{{ themeFolder }}/js/modules/inlineDemo/backbone-min.js"></script>
+<script src="{{ themeFolder }}/js/modules/inlineDemo/ace/ace.js"></script>
+<script src="{{ themeFolder }}/js/modules/inlineDemo/modo-0.13-custom.min.js"></script>
+<script src="{{ themeFolder }}/js/modules/inlineDemo/modo-aceeditor.js"></script>
+<script src="{{ themeFolder }}/js/modules/inlineDemo/gear.js"></script>
+</body>
+</html>

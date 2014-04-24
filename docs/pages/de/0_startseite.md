@@ -15,3 +15,5 @@ Der momentane Funktionsumfang umfasst:
 - Saubere, suchmaschinenfreundliche URLs
 - Konfiguration via JSON (eine globale JSON Datei + inline JSON Konfiguration pro Markdown Datei)
 - Theme-fähigkeit (Themes verwenden die mächtige [Twig templating engine](http://twig.sensiolabs.org/))
+- Zusatzmodule
+- Eingebettete, interaktive demos
