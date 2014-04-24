@@ -14,6 +14,18 @@ Besides of displaying a visual example and letting users peek into the source co
 inline demo element also allows users to modify the predefined sources in a sandboxed
 environment so they can play around with your examples to get a better understanding.
 
+##Inline demo security
+Inline demos can only serve static resources. You cannot create demos that incorporate any
+kind of serverside language like PHP or Ruby. If you list such files in a demo block, their
+plain source will be served to the user.
+
+Editable inline demos will create a fresh sandbox instance on every pageload. This means that
+any changes a user makes in the demo will be discarded when he reloads the page or navigates
+away.
+
+Sandboxes are tied to a users browser session. This way its impossible to access other people's
+sandboxes.
+
 
 ##Embedding an inline demo
 First, prepare a folder with all the assets needed for your demo in a subfolder of `docs/demos/`.
@@ -29,7 +41,7 @@ demo:{
         "demo.css",
         "demo.js"
     ],
-    "editable": false
+    "editable": true
 }:demo
 
 To embed a inline demo into your markdown element, you simply use a JSON block inside

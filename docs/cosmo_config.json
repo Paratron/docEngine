@@ -1,6 +1,6 @@
 {
     "title": "Cosmo",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "basePath": "/cosmo/src/",
     "homepage": "page/home",
     "cache": false,

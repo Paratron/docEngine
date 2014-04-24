@@ -16,11 +16,13 @@ class InlineDemos {
      */
     static $hooks = array(
             'contentUnparsed' => 'embedDemos',
-            'module:demo' => 'inlineDemo'
+            'module:demo' => 'inlineDemo',
+            'module:demofiles' => 'fileServer',
+            'module:demopulse' => 'pulse'
     );
 
     static $conf = array(
-        'active' => TRUE
+            'active' => TRUE
     );
 
     /**
@@ -32,14 +34,36 @@ class InlineDemos {
         }
 
         global $cosmo;
+        session_start();
 
-        while($demoTag = $cosmo->readJSONBlock($content, 'demo', TRUE, TRUE)){
+        if(!is_dir('lib/cache/sandbox')){
+            mkdir('lib/cache/sandbox');
+            mkdir('lib/cache/sandbox/open');
+        } else {
+            $openSessions = scandir('lib/cache/sandbox/open');
+            array_shift($openSessions);
+            array_shift($openSessions);
+            foreach($openSessions as $s){
+                if(filemtime('lib/cache/sandbox/open/' . $s) < time() - 60){
+                    $sessFiles = glob('lib/cache/sandbox/' . $s . '_*');
+                    foreach($sessFiles as $f){
+                        unlink($f);
+                    }
+                    unlink('lib/cache/sandbox/open/' . $s);
+                }
+            }
+        }
+
+
+        while ($demoTag = $cosmo->readJSONBlock($content, 'demo', TRUE, TRUE)) {
             $json = $demoTag['json'];
+            $sandboxId = uniqid('');
 
-            session_start();
-            $_SESSION['cosmo_demo_' . $json['target']] = $json;
+            $_SESSION[$sandboxId] = $json;
 
-            $html = '<iframe class="inlineDemo" src="module/demo/' . $json['target'] . '"></iframe>';
+            touch('lib/cache/sandbox/open/' . $sandboxId);
+
+            $html = '<iframe class="inlineDemo" src="module/demo/' . $sandboxId . '/' . $json['target'] . '"></iframe>';
 
             $content = substr_replace($content, $html, $demoTag['start'], $demoTag['end'] - $demoTag['start']);
         }
@@ -48,27 +72,34 @@ class InlineDemos {
     }
 
 
-    public static function inlineDemo($urlParams){
+    public static function inlineDemo($urlParams) {
         session_start();
 
+        $sandboxId = array_shift($urlParams);
         $demoName = implode('/', $urlParams);
 
-        if(!isset($_SESSION['cosmo_demo_' . $demoName . '/'])){
+        if (!isset($_SESSION[$sandboxId])) {
             die('Undefined demo');
         }
 
-        $demoConfig = $_SESSION['cosmo_demo_' . $demoName . '/'];
+        $demoConfig = $_SESSION[$sandboxId];
 
         $fileData = '';
 
-        foreach($demoConfig['display'] as $file){
-            if(!file_exists('docs/demos/' . $demoName . '/' . $file)){
+        foreach ($demoConfig['display'] as $file) {
+            if (!file_exists('docs/demos/' . $demoName . '/' . $file)) {
                 die('Cannot read file to display: ' . $file);
             }
             $fileContent = file_get_contents('docs/demos/' . $demoName . '/' . $file);
             $fileN = explode('.', $file);
             $fileN = implode('_', $fileN);
-            $fileData .= '<script type="text/html" id="file_' . $fileN . '">' . $fileContent . '</script>';
+            $fileData .= '<script type="text/html" id="file_' . $fileN . '">' . str_replace(array(
+                            '<',
+                            '>'
+                    ), array(
+                            '%-gts-%',
+                            '%-lts-%'
+                    ), $fileContent) . '</script>';
         }
 
         global $cosmo;
@@ -76,15 +107,78 @@ class InlineDemos {
         require 'lib/php/Kiss/Utils.php';
 
         $dta = array(
-            'editable' => isset($demoConfig['editable']) ? ($demoConfig['editable'] ? 'true' : 'false') : 'false',
-            'target' => $cosmo->mainConfig->basePath . 'docs/demos/' . $demoName . '/',
-            'basePath' => $cosmo->mainConfig->basePath,
-            'themeFolder' => $cosmo->themeFolder,
-            'files' => json_encode($demoConfig['display']),
-            'fileData' => $fileData
+                'sandboxId' => $sandboxId,
+                'editable' => isset($demoConfig['editable']) ? ($demoConfig['editable'] ? 'true' : 'false') : 'false',
+                'target' => $cosmo->mainConfig->basePath . 'module/demofiles/' . $sandboxId . '/',
+                'basePath' => $cosmo->mainConfig->basePath,
+                'themeFolder' => $cosmo->themeFolder,
+                'files' => json_encode($demoConfig['display']),
+                'fileData' => $fileData
         );
 
         die(\Kiss\Utils::template('@file::' . $cosmo->themeFolder . '/templates/modules/inlineDemo.twig', $dta));
+    }
+
+    public static function fileServer($urlParams) {
+        session_start();
+
+        $sandboxId = array_shift($urlParams);
+        $filePath = implode('/', $urlParams);
+
+        if (!$filePath) {
+            $filePath = 'index.html';
+        }
+
+        if (!isset($_SESSION[$sandboxId])) {
+            die('Unknown sandbox ' . print_r($_SESSION, TRUE));
+        }
+
+        $demoConfig = $_SESSION[$sandboxId];
+
+        $fileName = 'docs/demos/' . $demoConfig['target'] . $filePath;
+        $fileId = $sandboxId . '_' . md5($fileName);
+
+        if (!file_exists($fileName)) {
+            die('File not found :(');
+        }
+
+        //User setting data!
+        if (isset($demoConfig['editable']) && $demoConfig['editable'] && isset($_POST['data'])) {
+            if (!is_dir('lib/cache/sandbox/')) {
+                mkdir('lib/cache/sandbox/');
+            }
+            file_put_contents('lib/cache/sandbox/' . $fileId, $_POST['data']);
+            die('1');
+        }
+
+        require 'lib/php/Kiss/Utils.php';
+
+        header('Content-Type: ' . \Kiss\Utils::getMimeType($filePath));
+        header('Pragma: no-cache');
+        header('Cache-Control: no-cache');
+
+        if (file_exists('lib/cache/sandbox/' . $fileId)) {
+            header('Content-Length: ' . filesize('lib/cache/sandbox/' . $fileId));
+            readfile('lib/cache/sandbox/' . $fileId);
+            die();
+        }
+
+        header('Content-Length: ' . filesize($fileName));
+        readfile($fileName);
+        die();
+    }
+
+    public static function pulse($urlParams){
+        session_start();
+
+        $sandboxId = array_shift($urlParams);
+
+        if(isset($_SESSION[$sandboxId])){
+            touch('lib/cache/sandbox/open/' . $sandboxId);
+            die('1');
+        }
+
+        die('0');
     }
 }
  

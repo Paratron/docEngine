@@ -129,7 +129,6 @@ class Cosmo {
             $moduleParams = $this->requestParams;
             array_shift($moduleParams);
             array_shift($moduleParams);
-            array_pop($moduleParams);
 
             $this->callHook('module:' . $hookName, $moduleParams);
 
