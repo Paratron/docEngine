@@ -59,6 +59,8 @@ class InlineDemos {
             $json = $demoTag['json'];
             $sandboxId = uniqid('');
 
+            $json['languageTransfer'] = $cosmo->language;
+
             $_SESSION[$sandboxId] = $json;
 
             touch('lib/cache/sandbox/open/' . $sandboxId);
@@ -91,8 +93,7 @@ class InlineDemos {
                 die('Cannot read file to display: ' . $file);
             }
             $fileContent = file_get_contents('docs/demos/' . $demoName . '/' . $file);
-            $fileN = explode('.', $file);
-            $fileN = implode('_', $fileN);
+            $fileN = str_replace(array('.', '/'), '_', $file);
             $fileData .= '<script type="text/html" id="file_' . $fileN . '">' . str_replace(array(
                             '<',
                             '>'
@@ -106,6 +107,9 @@ class InlineDemos {
 
         require 'lib/php/Kiss/Utils.php';
 
+        $cosmo->language = $demoConfig['languageTransfer'];
+        $lang = $cosmo->readLanguage();
+
         $dta = array(
                 'sandboxId' => $sandboxId,
                 'editable' => isset($demoConfig['editable']) ? ($demoConfig['editable'] ? 'true' : 'false') : 'false',
@@ -113,7 +117,8 @@ class InlineDemos {
                 'basePath' => $cosmo->mainConfig->basePath,
                 'themeFolder' => $cosmo->themeFolder,
                 'files' => json_encode($demoConfig['display']),
-                'fileData' => $fileData
+                'fileData' => $fileData,
+                'lang' => json_encode($lang['modules']['inlineDemo'])
         );
 
         die(\Kiss\Utils::template('@file::' . $cosmo->themeFolder . '/templates/modules/inlineDemo.twig', $dta));
@@ -130,7 +135,7 @@ class InlineDemos {
         }
 
         if (!isset($_SESSION[$sandboxId])) {
-            die('Unknown sandbox ' . print_r($_SESSION, TRUE));
+            die('Unknown sandbox');
         }
 
         $demoConfig = $_SESSION[$sandboxId];
@@ -144,9 +149,6 @@ class InlineDemos {
 
         //User setting data!
         if (isset($demoConfig['editable']) && $demoConfig['editable'] && isset($_POST['data'])) {
-            if (!is_dir('lib/cache/sandbox/')) {
-                mkdir('lib/cache/sandbox/');
-            }
             file_put_contents('lib/cache/sandbox/' . $fileId, $_POST['data']);
             die('1');
         }

@@ -47,6 +47,12 @@ class Cosmo {
     var $requestURL;
 
     /**
+     * Contains the current page object being emitted by the routing function.
+     * @var null
+     */
+    var $currentPage = NULL;
+
+    /**
      * @var string Path of the current content file.
      */
     private $contentPath = '';
@@ -55,6 +61,12 @@ class Cosmo {
      * @var string The HTML content of the current page.
      */
     var $content = '';
+
+    /**
+     * Stores the current language as ISO string identifier.
+     * @var null
+     */
+    var $language = NULL;
 
     /**
      * Cache for global language strings fetched by readLanguage();
@@ -87,6 +99,13 @@ class Cosmo {
      */
     var $cssFiles = array();
 
+    /**
+     * Caches the twig instance with the string content loader, if getTwigStringInstance() has been called
+     * before.
+     * @var
+     */
+    private $twigStringCache = NULL;
+
     function __construct() {
         //First, lets read the cosmo config.
         $this->mainConfig = json_decode(file_get_contents('docs/cosmo_config.json'));
@@ -98,6 +117,23 @@ class Cosmo {
         $this->readFileStructure();
 
         $this->loadModules();
+    }
+
+    /**
+     * Will return a instance of Twig based on a string loader to be used inside of modules.
+     * @return null|\Twig_Environment
+     */
+    function getTwigStringInstance(){
+        if($this->twigStringCache){
+            return $this->twigStringCache;
+        }
+
+        $loader = new \Twig_Loader_String();
+        $twig = new \Twig_Environment($loader);
+
+        $this->twigStringCache = $twig;
+
+        return $twig;
     }
 
     function init() {
@@ -162,6 +198,7 @@ class Cosmo {
             }
         }
 
+        $this->currentPage = $page;
         $page = $this->callHook('routingFinished', $page);
 
         if (!$page) {
@@ -232,14 +269,14 @@ class Cosmo {
      * @return array
      */
     private function parse($content) {
-        require_once 'lib/php/Michelf/Markdown.inc.php';
+        require_once 'lib/php/Michelf/MarkdownExtra.inc.php';
 
         $result = $this->readJSONBlock($content, 'conf');
         $this->stripJSONBlock($content, $result);
 
         $content = $this->callHook('contentUnparsed', $content);
 
-        $content = \Michelf\Markdown::defaultTransform($content);
+        $content = \Michelf\MarkdownExtra::defaultTransform($content);
 
         $content = $this->callHook('contentParsed', $content);
 
@@ -286,7 +323,7 @@ class Cosmo {
         return $result;
     }
 
-    function loadModules() {
+    private function loadModules() {
         $moduleFiles = glob('lib/php/Cosmo/Modules/*.php');
 
         foreach ($moduleFiles as $m) {
@@ -318,7 +355,7 @@ class Cosmo {
         }
     }
 
-    function readFileStructure() {
+    private function readFileStructure() {
         $files = glob('docs/{articles,pages,reference}/*/*.md', GLOB_BRACE);
 
         $struct = array();
@@ -371,7 +408,7 @@ class Cosmo {
 
     private function readConfigFromFile($fileName) {
         if (!file_exists($fileName)) {
-            throw new \ErrorException('File not found');
+            throw new \ErrorException('File not found (' . $fileName . ')');
         }
 
         $f = fopen($fileName, 'r');
@@ -444,7 +481,7 @@ class Cosmo {
         return substr($content, $stringStart + 1, $i - $stringStart - 1);
     }
 
-    private function stripJSONBlock(&$content, $result, $replace = '') {
+    function stripJSONBlock(&$content, $result, $replace = '') {
         $content = substr_replace($content, $replace, $result['start'], $result['end'] - $result['start']);
     }
 

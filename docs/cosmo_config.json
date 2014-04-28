@@ -1,16 +1,26 @@
 {
     "title": "Cosmo",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "basePath": "/cosmo/src/",
     "homepage": "page/home",
     "cache": false,
     "theme": "flatbeat",
     "defaultLanguage": "en",
-    "disqus": true,
+    "disqus": false,
     "modules": {
         "PrettifySources": {
             "skin": "desert",
             "linenums": false
+        },
+        "Reference": {
+            "github": "Paratron/cosmo",
+            "branch": "master",
+            "quickNavigation": [
+                "property",
+                "method",
+                "event"
+            ],
+            "definitionTag": "h3"
         }
     }
 }

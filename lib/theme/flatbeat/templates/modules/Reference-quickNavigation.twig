@@ -1,0 +1,15 @@
+<div class="wgt-quicknavigation">
+     <span>Quicknavigation: </span>
+    <ul>
+        {% for group in data %}
+            <li>
+                <button class="{{ group.class }}">{{ group.title }}</button>
+                <ul>
+                    {% for element in group.children %}
+                        <li class="{{ element.classes }}"><a href="{{ element.link }}">{{ element.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+</div>

@@ -7,5 +7,11 @@
     },
     "navigationHeadlinePages": "Seiten",
     "navigationHeadlineArticles": "Artikel",
-    "navigationHeadlineReferences": "Referenz"
+    "navigationHeadlineReferences": "Referenz",
+    "modules": {
+        "inlineDemo": {
+            "demoTabLabel": "Demo",
+            "isEditableNotice": "Diese Demo kann bearbeitet werden"
+        }
+    }
 }
