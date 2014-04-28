@@ -213,7 +213,7 @@ which page to show. Example page object:
 
 The `config` property contains the parsed contents of the "config" JSON block from
 inside the markdown document. `sortOrder`, `type` and `lang` are taken from the
-pages `filePath`. The `key` property is used by modo to connect translations
+pages `filePath`. The `key` property is used by cosmo to connect translations
 of pages from different languages together.
 
 

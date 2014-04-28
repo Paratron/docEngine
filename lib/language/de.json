@@ -12,6 +12,13 @@
         "inlineDemo": {
             "demoTabLabel": "Demo",
             "isEditableNotice": "Diese Demo kann bearbeitet werden"
+        },
+        "Reference": {
+            "quickNavigation": {
+                "property": "Eigenschaften",
+                "method": "Methoden",
+                "event": "Events"
+            }
         }
     }
 }
