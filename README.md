@@ -1,5 +1,6 @@
-COSMO documentation engine
-==========================
+DocEngine
+=========
 
-The cosmo documentation engine tries to provide a PHP engine that can generate documentation websites
-based on markdown source files.
+DocEngine is PHP project that parses markdown pages to generate sophisticated documentation sites.
+
+DocEngine documentations can contain multiple languages and dynamic, editable inline examples.

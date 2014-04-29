@@ -4,7 +4,7 @@ conf:{
 }:conf
 
 #Inline Demos
-Cosmo allows you to place JSON tags inside your markdown files to embed inline demos into
+DocEngine allows you to place JSON tags inside your markdown files to embed inline demos into
 your documents.
 
 The purpose of inline demos is to show your users features and examples of the documented
@@ -68,5 +68,5 @@ The `display` array specifies which files from the folder should be displayed to
 in a source window.
 
 The `editable` property defines if a user should be able to modify the displayed code in the
-source windows, or not. In order to make editable demos work, you need to make sure that cosmo
+source windows, or not. In order to make editable demos work, you need to make sure that docEngine
 has write access to the `lib/cache/` folder.

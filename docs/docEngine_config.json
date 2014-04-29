@@ -1,0 +1,26 @@
+{
+    "title": "DocEngine",
+    "version": "0.4.0",
+    "basePath": "/docEngine/",
+    "homepage": "page/home",
+    "cache": false,
+    "theme": "flatbeat",
+    "defaultLanguage": "en",
+    "disqus": false,
+    "modules": {
+        "PrettifySources": {
+            "skin": "desert",
+            "linenums": false
+        },
+        "Reference": {
+            "github": "Paratron/docEngine",
+            "branch": "master",
+            "quickNavigation": [
+                "property",
+                "method",
+                "event"
+            ],
+            "definitionTag": "h3"
+        }
+    }
+}

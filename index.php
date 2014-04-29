@@ -4,25 +4,25 @@ require('lib/php/Twig/Autoloader.php');
 
 Twig_Autoloader::register();
 
-require 'lib/php/Cosmo/Cosmo.php';
+require 'lib/php/DocEngine/DocEngine.php';
 
-$cosmo = new \Cosmo\Cosmo();
+$docEngine = new \DocEngine\DocEngine();
 
-$cosmo->init();
+$docEngine->init();
 
-$loader = new Twig_Loader_Filesystem($cosmo->themeFolder . '/templates');
+$loader = new Twig_Loader_Filesystem($docEngine->themeFolder . '/templates');
 $twig = new Twig_Environment($loader, array(
-        'cache' => $cosmo->mainConfig->cache ? '/lib/cache' : NULL,
+        'cache' => $docEngine->mainConfig->cache ? '/lib/cache' : NULL,
 ));
 
-$cosmo->callHook('beforeRender');
+$docEngine->callHook('beforeRender');
 
 $result = $twig->render('base.twig', array(
-        'cosmo' => $cosmo,
-        'lang' => $cosmo->readLanguage(),
-        'config' => $cosmo->localConfig
+        'docEngine' => $docEngine,
+        'lang' => $docEngine->readLanguage(),
+        'config' => $docEngine->localConfig
 ));
 
-$result = $cosmo->callHook('afterRender', $result);
+$result = $docEngine->callHook('afterRender', $result);
 
 echo $result;

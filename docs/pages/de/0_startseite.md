@@ -3,9 +3,9 @@ conf:{
     "title": "Willkommen"
 }:conf
 
-#Vorstellung von Cosmo
+#Vorstellung von DocEngine
 
-Cosmo ist eine PHP basierende documentation engine die es Ihnen ermöglicht ihre Dokumentation in Markdown Dateien zu verfassen.
+DocEngine ist eine PHP basierende documentation engine die es Ihnen ermöglicht ihre Dokumentation in Markdown Dateien zu verfassen.
 
 Der momentane Funktionsumfang umfasst:
 

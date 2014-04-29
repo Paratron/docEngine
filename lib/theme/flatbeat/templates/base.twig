@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="{{ cosmo.language }}">
+<html lang="{{ docEngine.language }}">
 <head>
-    <base href="{{ cosmo.mainConfig.basePath }}">
+    <base href="{{ docEngine.mainConfig.basePath }}">
     <link href="favicon.ico" rel="shortcut icon">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
@@ -10,64 +10,64 @@
     <![endif]-->
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:700,400,300|Source+Code+Pro:200,400' rel='stylesheet'
           type='text/css'>
-    <link href="{{ cosmo.themeFolder }}/css/main.css" type="text/css" rel="stylesheet" media="screen">
-    {% for file in cosmo.cssFiles %}
-        <link href="{% if file.local %}{{ cosmo.themeFolder }}/css/{{ file.url }}{% else %}{{ file.url }}{% endif %}"
+    <link href="{{ docEngine.themeFolder }}/css/main.css" type="text/css" rel="stylesheet" media="screen">
+    {% for file in docEngine.cssFiles %}
+        <link href="{% if file.local %}{{ docEngine.themeFolder }}/css/{{ file.url }}{% else %}{{ file.url }}{% endif %}"
               type="text/css" rel="stylesheet" media="{{ file.media }}">
     {% endfor %}
-    <title>{{ cosmo.mainConfig.title }} - {{ config.title }}</title>
-    {% for file in cosmo.headerJavaScriptFiles %}
+    <title>{{ docEngine.mainConfig.title }} - {{ config.title }}</title>
+    {% for file in docEngine.headerJavaScriptFiles %}
         <script type="text/javascript"
-                src="{% if file.local %}{{ cosmo.themeFolder }}/js/{{ file.url }}{% else %}{{ file.url }}{% endif %}"></script>
+                src="{% if file.local %}{{ docEngine.themeFolder }}/js/{{ file.url }}{% else %}{{ file.url }}{% endif %}"></script>
     {% endfor %}
 </head>
-<body class="{{ cosmo.currentPage.type }}">
+<body class="{{ docEngine.currentPage.type }}">
 <div class="header">
     <div class="wrap">
-        <span class="logo">{{ cosmo.mainConfig.title }}</span>
-        {% if cosmo.mainConfig.version %}<span class="version">v {{ cosmo.mainConfig.version }}</span>{% endif %}
+        <span class="logo">{{ docEngine.mainConfig.title }}</span>
+        {% if docEngine.mainConfig.version %}<span class="version">v {{ docEngine.mainConfig.version }}</span>{% endif %}
 
-        {{ cosmo.callHook("renderHeader", "")|raw }}
+        {{ docEngine.callHook("renderHeader", "")|raw }}
 
-        {{ cosmo.renderLanguageWidget()|raw }}
+        {{ docEngine.renderLanguageWidget()|raw }}
     </div>
 </div>
 
 <div class="bodywrap">
     <div class="body">
         <div class="navigation">
-            {% set pages = cosmo.getPages() %}
+            {% set pages = docEngine.getPages() %}
             {% if pages|length %}
                 <div class="navigationBlock">
                     <ul>
                         {% for page in pages %}
-                            <li{% if cosmo.requestURL == page.url %} class="active"{% endif %}><a
+                            <li{% if docEngine.requestURL == page.url %} class="active"{% endif %}><a
                                         href="{{ page.url }}">{{ page.title }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>
             {% endif %}
 
-            {% set pages = cosmo.getArticles() %}
+            {% set pages = docEngine.getArticles() %}
             {% if pages|length %}
                 <div class="navigationBlock">
                     <h3>{{ lang.navigationHeadlineArticles }}</h3>
                     <ul>
                         {% for page in pages %}
-                            <li{% if cosmo.requestURL == page.url %} class="active"{% endif %}><a
+                            <li{% if docEngine.requestURL == page.url %} class="active"{% endif %}><a
                                         href="{{ page.url }}">{{ page.title }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>
             {% endif %}
 
-            {% set pages = cosmo.getReferences() %}
+            {% set pages = docEngine.getReferences() %}
             {% if pages|length %}
                 <div class="navigationBlock">
                     <h3>{{ lang.navigationHeadlineReferences }}</h3>
                     <ul>
                         {% for page in pages %}
-                            <li{% if cosmo.requestURL == page.url %} class="active"{% endif %}><a
+                            <li{% if docEngine.requestURL == page.url %} class="active"{% endif %}><a
                                         href="{{ page.url }}">{{ page.title }}</a></li>
                         {% endfor %}
                     </ul>
@@ -76,14 +76,14 @@
         </div>
         <div class="content">
             <div class="content-content">
-                {{ cosmo.content|raw }}
+                {{ docEngine.content|raw }}
             </div>
             <div class="content-discussion">
-                {% if cosmo.mainConfig.disqus %}
+                {% if docEngine.mainConfig.disqus %}
                 <div id="disqus_thread"></div>
                 <script type="text/javascript">
                     /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-                    var disqus_shortname = '{{ cosmo.mainConfig.disqus }}'; // required: replace example with your forum shortname
+                    var disqus_shortname = '{{ docEngine.mainConfig.disqus }}'; // required: replace example with your forum shortname
 
                     /* * * DON'T EDIT BELOW THIS LINE * * */
                     (function (){
@@ -106,9 +106,9 @@
 
 <div class="footer">
     <div class="wrap">
-        Made with <a href="http://github.com/paratron/cosmo">cosmo</a>
+        Made with <a href="http://github.com/paratron/docEngine">docEngine</a>
 
-        {{ cosmo.callHook("renderFooter", "")|raw }}
+        {{ docEngine.callHook("renderFooter", "")|raw }}
     </div>
 </div>
 </body>
