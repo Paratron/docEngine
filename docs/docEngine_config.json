@@ -2,10 +2,11 @@
     "title": "DocEngine",
     "version": "0.4.0",
     "basePath": "/docEngine/",
-    "homepage": "page/home",
+    "homepageType": "page",
+    "homepageKey": "welcome",
+    "defaultLanguage": "en",
     "cache": false,
     "theme": "flatbeat",
-    "defaultLanguage": "en",
     "disqus": false,
     "modules": {
         "PrettifySources": {

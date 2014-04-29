@@ -123,8 +123,8 @@ class DocEngine {
      * Will return a instance of Twig based on a string loader to be used inside of modules.
      * @return null|\Twig_Environment
      */
-    function getTwigStringInstance(){
-        if($this->twigStringCache){
+    function getTwigStringInstance() {
+        if ($this->twigStringCache) {
             return $this->twigStringCache;
         }
 
@@ -159,52 +159,93 @@ class DocEngine {
 
         $page = NULL;
 
-        //Maybe a module request?
-        if($pCount > 0 && $this->requestParams[0] == 'module'){
-            $hookName = $this->requestParams[1];
-            $moduleParams = $this->requestParams;
-            array_shift($moduleParams);
-            array_shift($moduleParams);
+        if ($pCount) {
+            switch ($this->requestParams[0]) {
+                case 'module':
+                    $hookName = $this->requestParams[1];
+                    $moduleParams = $this->requestParams;
+                    array_shift($moduleParams);
+                    array_shift($moduleParams);
 
-            $this->callHook('module:' . $hookName, $moduleParams);
+                    $this->callHook('module:' . $hookName, $moduleParams);
 
-            die();
-        }
+                    die();
+                    break;
 
-        //Language parameter missing?
-        if ($pCount > 0 && $pCount < 3) {
-            //One or no Param - assumes language to be not given
-            $this->language = $this->mainConfig->defaultLanguage;
-            $last = $this->requestParams[$pCount - 1];
+                case 'article':
+                case 'page':
+                case 'reference':
+                    $type = $this->requestParams[0];
+                    $lang = NULL;
+                    $identifier = NULL;
 
-            if (!($page = $this->getPageByURL(implode('/', array(
-                    $this->requestParams[0],
-                    $this->language,
-                    $last
-            ))))
-            ) {
-                header('location: ' . $this->mainConfig->basePath . $this->mainConfig->homepage);
-                die();
+                    if (isset($this->requestParams[1])) {
+                        $lang = $this->requestParams[1];
+                    }
+
+                    if (isset($this->requestParams[2])) {
+                        $identifier = $this->requestParams[2];
+                    }
+                    else {
+                        if (strlen($lang) > 2) {
+                            $identifier = $lang;
+                            $lang = NULL;
+                        }
+                    }
+
+                    if ($page = $this->getPageByURL($this->requestURL)) {
+                        break;
+                    }
+
+                    if (!$lang) {
+                        //No language given in URL. Find the users most desired language.
+
+                        $desiredLanguages = $this->getLanguages();
+                        foreach ($desiredLanguages as $l) {
+                            if ($identifier) {
+                                //Identifier given. Try to find a page with this identifier in this language.
+                                if ($page = $this->getPageByURL(implode('/', array(
+                                        $type,
+                                        $l,
+                                        $identifier
+                                )))
+                                ) {
+                                    return $this->redirectTo($page);
+                                }
+                            }
+                            else {
+                                //No identifier given. Find the homepage in this language.
+                                if ($page = $this->getPageByLanguageAndKey($type, $l, $this->mainConfig->homepageKey)) {
+                                    return $this->redirectTo($page);
+                                }
+                            }
+                        }
+                        //Okay, everything failed - send the user back to the root.
+                        return $this->redirectTo(NULL);
+                    }
+
+                    if (!$identifier) {
+                        //No Page identifier, but language given. Redirect to homepage in the requested language.
+                        $page = $this->getPageByLanguageAndKey($type, $lang, $this->mainConfig->homepage);
+                        return $this->redirectTo($page);
+                    }
+
+                    break;
             }
-
-            $lang = $page['lang'];
-            header('location: ' . $this->mainConfig->basePath . $this->requestParams[0] . '/' . $lang . '/' . $last);
-            die();
         }
         else {
-            if ($pCount > 0) {
-                $this->language = strtolower(substr($this->requestParams[1], 0, 2));
-                $page = $this->getPageByURL($this->requestURL);
+            //Nothing given. Find the projects welcome page in the users most desired language.
+            $desiredLanguages = $this->getLanguages();
+            foreach ($desiredLanguages as $l) {
+                if ($page = $this->getPageByLanguageAndKey($this->mainConfig->homepageType, $l, $this->mainConfig->homepageKey)) {
+                    return $this->redirectTo($page);
+                }
             }
         }
 
+        $this->language = $page['lang'];
         $this->currentPage = $page;
         $page = $this->callHook('routingFinished', $page);
-
-        if (!$page) {
-            header('location: ' . $this->mainConfig->basePath . $this->mainConfig->homepage);
-            die();
-        }
 
         $this->contentPath = $page['filePath'];
         $this->localConfig = $page['config'];
@@ -238,6 +279,40 @@ class DocEngine {
         $this->content = $this->parse(file_get_contents($this->contentPath));
     }
 
+    function redirectTo($pageObject) {
+        $url = '';
+
+        if ($pageObject === NULL) {
+            $pageObject = $this->getPageByLanguageAndKey($this->mainConfig->homepageType, $this->mainConfig->defaultLanguage, $this->mainConfig->homepageKey);
+            $url = $pageObject['url'];
+        }
+        else {
+            $url = $pageObject['url'];
+        }
+
+        header('location: ' . $this->mainConfig->basePath . $url);
+        die();
+    }
+
+    /**
+     * Analyzes the user preferred languages taken from his HTTP request header.
+     * The systems default language is added to the end in case none of the user preferred languages fits.
+     */
+    private function getLanguages() {
+        $out = array();
+
+        if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+            $langs = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+            foreach ($langs as $lang) {
+                $out[] = substr($lang, 0, 2);
+            }
+        }
+
+        $out[] = $this->mainConfig->defaultLanguage;
+
+        return array_unique($out);
+    }
+
     private function sandbox($dynFileName, &$vars) {
         include $dynFileName;
     }
@@ -245,6 +320,16 @@ class DocEngine {
     private function getPageByURL($url) {
         foreach ($this->fileStructure as $f) {
             if ($f['url'] == $url) {
+                return $f;
+            }
+        }
+
+        return NULL;
+    }
+
+    private function getPageByLanguageAndKey($type, $language, $key) {
+        foreach ($this->fileStructure as $f) {
+            if ($f['type'] == $type && $f['lang'] == $language && $f['key'] == $key) {
                 return $f;
             }
         }
@@ -295,21 +380,22 @@ class DocEngine {
     function readJSONBlock($content, $blockTag, $assoc = FALSE, $noindent = FALSE) {
         $start = strpos($content, $blockTag . ':{');
 
-        if($start === FALSE){
+        if ($start === FALSE) {
             return FALSE;
         }
 
-        if($noindent && $start > 0){
+        if ($noindent && $start > 0) {
             $before = substr($content, $start - 1, 1);
-            if($before == ' ' || $before == "\t")
-            return FALSE;
+            if ($before == ' ' || $before == "\t") {
+                return FALSE;
+            }
         }
 
         $end = strpos($content, '}:' . $blockTag, $start);
         $content = substr($content, $start + strlen($blockTag) + 1, $end - ($start + strlen($blockTag)));
         $json = json_decode($content, $assoc);
 
-        if($json === NULL){
+        if ($json === NULL) {
             throw new \ErrorException('JSON block parsing error. Block tag: ' . $blockTag . ' Content: ' . $content);
         }
 

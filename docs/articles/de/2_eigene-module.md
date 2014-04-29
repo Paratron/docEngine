@@ -1,44 +1,44 @@
 conf:{
     "key": "modules",
-    "title": "Custom Modules"
+    "title": "Eigene Module"
 }:conf
 
 #Custom Modules
-DocEngine is designed to implement custom modules without much hassle. Do you want to have a user system
-where people can login to do stuff? Just implement a module. Do you need to have fancy graphs rendered
-or want LaTEX to be interpreted and rendered? Its just a small module away.
+DocEngine wurde so gestaltet, dass sich eigene Module ohne große Mühe integrieren lassen. Willst du ein
+Benutzersystem haben, bei dem sich die Leute einloggen können um Dinge auf deiner Seite zu erledigen?
+Willst du schicke Diagramme rendern, oder willst du LaTEX interpretieren und rendern? Das alles ist nur
+ein kleines Modul weit weg.
 
+##Modulgrundlagen
+Der Quellcode deines Modul muss im Ordner `lib/php/DocEngine/Modules/` gespeichert werden. Dies ist der Ordner,
+welcher von DocEngine gescanned wird - alle enthaltenen PHP Dateien darin werden als Module geladen.
 
-##Module Basics
-The source of your module muse be saved in the folder `lib/php/DocEngine/Modules/`. Thats the folder that
-is being scanned by DocEngine and all of the PHP files inside it are loaded as modules.
+Dein Modulcode muss eine Klasse sein, die lediglich statische Methoden und Eigenschaften verwendet. Sie wird
+niemals instanziert und nur statisch aufgerufen werden.
 
-Your module code needs to be a class that offers only static methods and properties. It will never be
-instanciated and only called statically.
+Deine Klasse muss mindestens die statischen Eigenschaften `$hooks` und `$conf` implementieren - alles andere
+ist optional.
 
-Your class is required to have the static properties `$hooks` and `$conf` defined - everything else is optional.
+Momentan werden alle zusätzlichen Dateien von Modulen im Theme Ordner gespeichert. Wenn du Sub-Templates benötigst,
+so wie die inlineDemo und quickNavigation Module, speicherst du diese unter `lib/theme/[themename]/templates/modules/`.
+Das selbe gilt für JS- und CSS-Dateien, sowie Grafiken. Dies macht das Installieren und Entfernen von Modulen ein bischen
+umständlich, allerdings konnte ich bisher noch keine bessere Möglichkeit finden, da die Ausgabe von Modulen je nach Theme
+anders sein kann. Wenn du eine Idee hast, kontaktiere mich bitte.
 
-Right now, any additional stuff for modules is stored inside the theme folder. If you need sub-templates,
-like the inlineDemo and quickNavigation modules do, those go to `lib/theme/[themename]/templates/modules/`.
-The same applies for JS, CSS and images. This makes installing / removing of modules a bit af a hassle, but
-since the output of modules might be different, based on the current theme, I haven't figured out a better
-way of storing additional module files, yet. If you have an idea, please contact me.
+##Ein Beispielmodul verstehen
+Schau dir einmal eins der einfachsten Module für DocEngine an: das bereits enthaltene Module, welches Googles Code-Prettifier
+ zur Dokumentation hinzufügt um deine Code-Beispiele (auch das jetzt folgende) schön darzustellen.
 
-
-##Understanding a example module
-Have a look at one of the most basic modules for DocEngine: the already bundled module that adds googles
-code prettifier to the documentation to make your code examples (including this one) look beautiful.
-
-We will explain it in detail below the code block:
-
+Wir werden es nach dem Code-Block detailliert analysieren:
 
     class PrettifySources {
-        // Tells docEngine which methods to call when.
+        // Teilt docEngine mit, welche Methoden wann aufzurufen sind.
         static $hooks = array(
                 'contentParsed' => 'prettifyAll'
         );
 
-        // Initial module config. Can be overridden by main config and local config.
+        // Voreingestellte Modul Konfiguration. Kann von der globalen Konfiguration,
+        // oder lokalen Konfiguration überschrieben werden.
         static $conf = array(
                 'active' => TRUE,
                 'lang' => array(),
@@ -47,7 +47,8 @@ We will explain it in detail below the code block:
         );
 
         /**
-         * Takes the whole page source and adds the prettify
+         * Nimmt den kompletten Quelltext der Seite und fügt
+         * die Prettify Klasse zu pre tags hinzu.
          * @param $source
          * @return mixed
          */
@@ -68,7 +69,7 @@ We will explain it in detail below the code block:
                                   $source,
                                   $count);
 
-            //When we have placed some prettyprints, we have to load the JS as well.
+            //Wenn wir ein paar prettyprints platziert haben, müssen wir auch das JS laden.
             if ($count > 0) {
                 global $docEngine;
 
@@ -85,42 +86,42 @@ We will explain it in detail below the code block:
         }
     }
 
-The class is being loaded by docEngine in docEngines' `init()` method. DocEngine looks for the `$hooks` property and
-registers each given hook to a static method inside the class. In our example class here,
-the `prettifyAll` method is hooked against the `contentParsed` hook.
+Die Klasse wird in DocEngines' `init()` Methode geladen. DocEngine sucht nach der `$hooks` Eigenschaft und verknüpft jeden
+Hook mit der jeweils angegebenen statischen Methode in der Klasse. In unserer Beispielklasse hier wird die `prettifyAll` Methode
+mit dem Hook `contentParsed` verbunden.
 
-When the `contentParsed` hook is called after the current pages' markdown file has been loaded and interpreted,
-the HTML result is passed over to all methods that have been registered to the `contentParsed` hook - including
-our method.
+Wenn der `contentParsed` hook aufgerufen wird, nachdem die Markdown-Datei der aktuellen Seite geladen und interpretiert wurde,
+wird das HTML-Ergebnis an alle Methoden übergeben, welche mit dem `contentParsed` Hook verknüpft sind - darunter auch unsere Methode.
 
-So the `prettifyAll` method of our class is being called and handed over the HTML code that is about to be passed
-to the current themes template and then to the browser. We want to inject googles prettify library, so we need
-to do two things:
+Also wird die `prettifyAll` Methode unserer Klasse aufgerufen und bekommt den HTML-Code übergeben, der danach in das Template des
+aktuellen Themes eingefügt und an den Browser des Besuchers weitergeleitet wird. Wir wollen Googles Prettify Library einfügen, also
+ benötigen wir zwei Dinge:
 
-- Adding the css class `prettyprint` to all `pre` tags
-- Loading the google prettify javascript library into the page
+- Die CSS-Klasse `prettyprint` zu allen `pre` tags hinzufügen.
+- Die Google Prettify Javascript Bibliothek in die Seite hinein laden.
 
-Adding the `prettyprint` class to all `pre` tags is done easily:
+Das Hinzufügen der `prettyprint` Klasse zu allen `pre` Tags ist einfach erledigt:
 
     $result = str_replace('<pre>',
                           '<pre class="prettyprint' . $conf . '">',
                           $source,
                           $count);
 
-We even do something more. You can command the prettyprint library to display line-numbers or not
-by adding the additional css-class `linenumbers` to the `pre` tag as well.
-So by checking the modules config object if linenumbers are wanted, we can decide here to include
-the `linenumbers` class here as well, or not. More about module configs below.
+Wir tun sogar etwas mehr: Du kannst die Prettyprint Bibliothek anweisen, Zeilennummern anzuzeigen, indem du die
+zusätzliche CSS-Klasse `linenumbers` ebenfalls zum `pre` Tag hinzufügst.
+Wenn wir im Modul Config-Objekt nachschauen ob Zeilennummern erwünscht sind, können wir hier entscheiden
+die Klasse `linenumbers` ebenfalls einzufügen, oder nicht. Mehr über die Modul Config findest du weiter unten.
 
-After the result has been modified, we are checking the `$count` property, if any replacements have
-been made (maybe there aren't any code blocks in the current page). If so, the prettyprint Javascript
-library is being loaded into the page via `$docEngine->addJavascriptFile()`.
+Nachdem das Ergebnis modifiziert wurde, prüfen wir die `$count` Eigenschaft, ob irgendwelche Ersetzungen gemacht
+wurden (eventuell gibt es in der aktuellen Seite ja garkeine Code-Blöcke). Wenn das der Fall ist, wird die Prettyprint
+Javascript Bibliothek in die Seite geladen mit dem Aufruf `$docEngine->addJavascriptFile()`.
 
-The modified result is returned at the end of the method so docEngine can finish rendering the page and display
-it to the user. It wasn't that complicated, wasn't it?
+Das modifizierte Ergebnis wird am Ende der Methode zurückgegeben, damit DocEngine das Rendern der Seite abschließen und
+diese dem User anzeigen kann. Das war jetzt nicht kompliziert, oder?
+
+##Modulkonfiguration
 
 
-##Module configuration
 You most certainly already noticed the `$conf` property of the module. This is where you can set some
 options to modify the modules behaviour. You can pre-define some default values from inside the module
 code (like you can see above), but the properties here will be overwritten if other values have been
