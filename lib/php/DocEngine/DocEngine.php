@@ -153,95 +153,76 @@ class DocEngine {
 
         /*
          * A URL request always consists from:
-         * /(page|article|reference)/(language)/(id)
+         * /(language)/(module|page|article|reference)/(id)
          */
         $pCount = count($this->requestParams);
 
         $page = NULL;
+        $reqLang = NULL;
+        $reqType = NULL;
+        $reqIdentifier = NULL;
 
         if ($pCount) {
-            switch ($this->requestParams[0]) {
-                case 'module':
-                    $hookName = $this->requestParams[1];
+            $reqLang = $this->requestParams[0];
+            if ($pCount >= 3) {
+                $reqType = $this->requestParams[1];
+                $reqIdentifier = $this->requestParams[2];
+
+                if (!in_array($reqType, array(
+                        'article',
+                        'page',
+                        'reference',
+                        'module'
+                ))
+                ) {
+                    //Invalid URL format - find homepage in requested language
+                    $reqType = NULL;
+                    $reqIdentifier = NULL;
+                }
+
+                if ($reqType == 'module') {
                     $moduleParams = $this->requestParams;
                     array_shift($moduleParams);
                     array_shift($moduleParams);
+                    array_shift($moduleParams);
 
-                    $this->callHook('module:' . $hookName, $moduleParams);
+
+                    $this->callHook('module:' . $reqIdentifier, $moduleParams);
 
                     die();
-                    break;
-
-                case 'article':
-                case 'page':
-                case 'reference':
-                    $type = $this->requestParams[0];
-                    $lang = NULL;
-                    $identifier = NULL;
-
-                    if (isset($this->requestParams[1])) {
-                        $lang = $this->requestParams[1];
-                    }
-
-                    if (isset($this->requestParams[2])) {
-                        $identifier = $this->requestParams[2];
-                    }
-                    else {
-                        if (strlen($lang) > 2) {
-                            $identifier = $lang;
-                            $lang = NULL;
-                        }
-                    }
-
-                    if ($page = $this->getPageByURL($this->requestURL)) {
-                        break;
-                    }
-
-                    if (!$lang) {
-                        //No language given in URL. Find the users most desired language.
-
-                        $desiredLanguages = $this->getLanguages();
-                        foreach ($desiredLanguages as $l) {
-                            if ($identifier) {
-                                //Identifier given. Try to find a page with this identifier in this language.
-                                if ($page = $this->getPageByURL(implode('/', array(
-                                        $type,
-                                        $l,
-                                        $identifier
-                                )))
-                                ) {
-                                    return $this->redirectTo($page);
-                                }
-                            }
-                            else {
-                                //No identifier given. Find the homepage in this language.
-                                if ($page = $this->getPageByLanguageAndKey($type, $l, $this->mainConfig->homepageKey)) {
-                                    return $this->redirectTo($page);
-                                }
-                            }
-                        }
-                        //Okay, everything failed - send the user back to the root.
-                        return $this->redirectTo(NULL);
-                    }
-
-                    if (!$identifier) {
-                        //No Page identifier, but language given. Redirect to homepage in the requested language.
-                        $page = $this->getPageByLanguageAndKey($type, $lang, $this->mainConfig->homepage);
-                        return $this->redirectTo($page);
-                    }
-
-                    break;
-            }
-        }
-        else {
-            //Nothing given. Find the projects welcome page in the users most desired language.
-            $desiredLanguages = $this->getLanguages();
-            foreach ($desiredLanguages as $l) {
-                if ($page = $this->getPageByLanguageAndKey($this->mainConfig->homepageType, $l, $this->mainConfig->homepageKey)) {
-                    return $this->redirectTo($page);
                 }
             }
         }
+
+        if (!$reqLang) {
+            $desiredLanguages = $this->getLanguages();
+            foreach ($desiredLanguages as $l) {
+                if ($reqIdentifier) {
+                    if ($page = $this->getPage($reqType, $l, $reqIdentifier)) {
+                        $this->redirectTo($page);
+                    }
+                }
+                else {
+                    if ($page = $this->getPageByLanguageAndKey($this->mainConfig->homepageType, $l, $this->mainConfig->homepageKey)) {
+                        $this->redirectTo($page);
+                    }
+                }
+            }
+        }
+        else {
+            if ($reqIdentifier) {
+                $page = $this->getPage($reqType, $reqLang, $reqIdentifier);
+            }
+            else {
+                $page = $this->getPageByLanguageAndKey($this->mainConfig->homepageType, $reqLang, $this->mainConfig->homepageKey);
+                $this->redirectTo($page);
+            }
+        }
+
+        if (!$page) {
+            $this->redirectTo(NULL);
+        }
+
 
         $this->language = $page['lang'];
         $this->currentPage = $page;
@@ -317,7 +298,8 @@ class DocEngine {
         include $dynFileName;
     }
 
-    private function getPageByURL($url) {
+    private function getPage($type, $language, $identifier) {
+        $url = $language . '/' . $type . '/' . $identifier;
         foreach ($this->fileStructure as $f) {
             if ($f['url'] == $url) {
                 return $f;
@@ -482,9 +464,11 @@ class DocEngine {
             else {
                 $structObj['key'] = NULL;
             }
+
             $structObj['title'] = $structObj['config']['title'];
             $structObj['lang'] = $f[2];
-            $structObj['url'] = $f[1] . '/' . $f[2] . '/' . $f[3];
+            $structObj['url'] = $f[2] . '/' . $f[1] . '/' . $f[3];
+            $structObj['relativeUrl'] = '../' . $f[1] . '/' . $f[3];
             $struct[] = $structObj;
         }
 
@@ -578,6 +562,7 @@ class DocEngine {
             if ($f['type'] === $type && $f['lang'] === $this->language) {
                 $out[] = array(
                         'url' => $f['url'],
+                        'relativeUrl' => $f['relativeUrl'],
                         'title' => $f['config']['title']
                 );
             }
@@ -614,12 +599,12 @@ class DocEngine {
         );
 
         if (isset($this->localConfig['key'])) {
-            $refKey = $this->requestParams[0] . '_' . $this->localConfig['key'];
+            $refKey = $this->currentPage['type'] . '_' . $this->localConfig['key'];
             if (isset($this->keyFileStructureReference[$refKey])) {
                 foreach ($this->keyFileStructureReference[$refKey] as $refIndex) {
                     $f = $this->fileStructure[$refIndex];
                     $wgt['availableLanguages'][] = array(
-                            'url' => $f['url'],
+                            'url' => '../../' . $f['url'],
                             'isoCode' => $f['lang'],
                             'name' => $this->globalLanguage['languages'][$f['lang']],
                             'pageTitle' => $f['title'],

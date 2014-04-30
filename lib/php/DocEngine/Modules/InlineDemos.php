@@ -65,7 +65,7 @@ class InlineDemos {
 
             touch('lib/cache/sandbox/open/' . $sandboxId);
 
-            $html = '<iframe class="inlineDemo" src="module/demo/' . $sandboxId . '/' . $json['target'] . '"></iframe>';
+            $html = '<iframe class="inlineDemo" src="../module/demo/' . $sandboxId . '/' . $json['target'] . '"></iframe>';
 
             $content = substr_replace($content, $html, $demoTag['start'], $demoTag['end'] - $demoTag['start']);
         }
@@ -113,7 +113,7 @@ class InlineDemos {
         $dta = array(
                 'sandboxId' => $sandboxId,
                 'editable' => isset($demoConfig['editable']) ? ($demoConfig['editable'] ? 'true' : 'false') : 'false',
-                'target' => $docEngine->mainConfig->basePath . 'module/demofiles/' . $sandboxId . '/',
+                'target' => $docEngine->mainConfig->basePath . $docEngine->language . '/module/demofiles/' . $sandboxId . '/',
                 'basePath' => $docEngine->mainConfig->basePath,
                 'themeFolder' => $docEngine->themeFolder,
                 'files' => json_encode($demoConfig['display']),

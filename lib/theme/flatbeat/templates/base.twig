@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ docEngine.language }}">
 <head>
-    <base href="{{ docEngine.mainConfig.basePath }}">
     <link href="favicon.ico" rel="shortcut icon">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
@@ -10,9 +9,9 @@
     <![endif]-->
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:700,400,300|Source+Code+Pro:200,400' rel='stylesheet'
           type='text/css'>
-    <link href="{{ docEngine.themeFolder }}/css/main.css" type="text/css" rel="stylesheet" media="screen">
+    <link href="../../{{ docEngine.themeFolder }}/css/main.css" type="text/css" rel="stylesheet" media="screen">
     {% for file in docEngine.cssFiles %}
-        <link href="{% if file.local %}{{ docEngine.themeFolder }}/css/{{ file.url }}{% else %}{{ file.url }}{% endif %}"
+        <link href="{% if file.local %}../../{{ docEngine.themeFolder }}/css/{{ file.url }}{% else %}{{ file.url }}{% endif %}"
               type="text/css" rel="stylesheet" media="{{ file.media }}">
     {% endfor %}
     <title>{{ docEngine.mainConfig.title }} - {{ config.title }}</title>
@@ -42,7 +41,7 @@
                     <ul>
                         {% for page in pages %}
                             <li{% if docEngine.requestURL == page.url %} class="active"{% endif %}><a
-                                        href="{{ page.url }}">{{ page.title }}</a></li>
+                                        href="{{ page.relativeUrl }}">{{ page.title }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -55,7 +54,7 @@
                     <ul>
                         {% for page in pages %}
                             <li{% if docEngine.requestURL == page.url %} class="active"{% endif %}><a
-                                        href="{{ page.url }}">{{ page.title }}</a></li>
+                                        href="{{ page.relativeUrl }}">{{ page.title }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -68,7 +67,7 @@
                     <ul>
                         {% for page in pages %}
                             <li{% if docEngine.requestURL == page.url %} class="active"{% endif %}><a
-                                        href="{{ page.url }}">{{ page.title }}</a></li>
+                                        href="{{ page.relativeUrl }}">{{ page.title }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>

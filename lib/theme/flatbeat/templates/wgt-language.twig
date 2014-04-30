@@ -1,8 +1,8 @@
 <div class="wgt-language">
-    <button title="{{ lang.changeLanguage }}" style="background-image: url(lib/theme/flatbeat/img/flags/32/{{ wgt.currentLanguage.isoCode }}.png)">{{ wgt.currentLanguage.name }}</button>
+    <button title="{{ lang.changeLanguage }}" style="background-image: url(../../lib/theme/flatbeat/img/flags/32/{{ wgt.currentLanguage.isoCode }}.png)">{{ wgt.currentLanguage.name }}</button>
     <div class="available-languages">
         {% for lang in wgt.availableLanguages %}
-            <a href="{{ lang.url }}" style="background-image: url(lib/theme/flatbeat/img/flags/16/{{ lang.isoCode }}.png)" class="{{ lang.isoCode }}{% if lang.active %} active{% endif %}">{{ lang.isoCode }}</a>
+            <a href="{{ lang.url }}" style="background-image: url(../../lib/theme/flatbeat/img/flags/16/{{ lang.isoCode }}.png)" class="{{ lang.isoCode }}{% if lang.active %} active{% endif %}">{{ lang.isoCode }}</a>
         {% endfor %}
     </div>
 </div>

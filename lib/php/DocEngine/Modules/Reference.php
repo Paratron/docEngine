@@ -56,8 +56,6 @@ class Reference {
                 }
             }
             $definitionLink = static::getDefinitionLink($definitionName, $classes[0]);
-            $absoluteDefinitionLink = $docEngine->requestURL . '#' . $definitionLink;
-
 
             foreach($classes as $c){
                 if(!isset($groups[$c])){
@@ -66,12 +64,12 @@ class Reference {
 
                 $groups[$c][] = array(
                     'title' => $definitionName,
-                    'link' => $absoluteDefinitionLink,
+                    'link' => '#' . $definitionLink,
                     'classes' => implode(' ', $classes)
                 );
             }
 
-            $html = '<a id="' . $definitionLink . '" href="' . $absoluteDefinitionLink . '">' . $definitionName . '</a>';
+            $html = '<a id="' . $definitionLink . '" href="#' . $definitionLink . '">' . $definitionName . '</a>';
 
             if($parameters){
                 $html .= '(<span>' . implode(', ', $parameters) . '</span>)';
