@@ -117,6 +117,7 @@ class InlineDemos {
                 'basePath' => $docEngine->mainConfig->basePath,
                 'themeFolder' => $docEngine->themeFolder,
                 'files' => json_encode($demoConfig['display']),
+                'links' => json_encode($demoConfig['links']),
                 'fileData' => $fileData,
                 'lang' => json_encode($lang['modules']['inlineDemo'])
         );

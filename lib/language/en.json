@@ -17,6 +17,7 @@
             "quickNavigation": {
                 "property": "Properties",
                 "method": "Methods",
+                "static-method": "Static Methods",
                 "event": "Events"
             }
         }
