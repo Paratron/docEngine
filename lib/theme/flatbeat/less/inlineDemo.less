@@ -39,6 +39,31 @@ body {
     }
 }
 
+.notice{
+    background: #fcf8e3;
+    border-bottom: #faebcc solid 1px;
+    color: #8a6d3b;
+    padding: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    left: 0;
+
+    &:after{
+        content: "×";
+        float: right;
+        font-size: 14px;
+    }
+
+    &:hover{
+        &:after{
+            font-size: 14px;
+            font-weight: bold;
+        }
+    }
+}
+
 .mdo-toggled {
     padding: 5px 8px;
 

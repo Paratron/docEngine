@@ -118,6 +118,7 @@ class InlineDemos {
                 'themeFolder' => $docEngine->themeFolder,
                 'files' => json_encode($demoConfig['display']),
                 'links' => json_encode($demoConfig['links']),
+                'notice' => $demoConfig['notice'],
                 'fileData' => $fileData,
                 'lang' => json_encode($lang['modules']['inlineDemo'])
         );
