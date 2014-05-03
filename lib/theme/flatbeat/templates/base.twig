@@ -122,6 +122,8 @@
         window.scrollTo(0,0);
 
         document.getElementById('mobileMenu').addEventListener('click', function (){
+            this.blur();
+
             if(navVisible){
                 navVisible = false;
                 document.getElementById('languages').style.display = 'none';

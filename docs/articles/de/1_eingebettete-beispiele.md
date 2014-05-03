@@ -40,6 +40,10 @@ demo:{
         "demo.css",
         "demo.js"
     ],
+    "links": {
+        "Ausgehender Link": "http://google.de"
+    },
+    "notice": "Ich kann sogar ausblendbare Hinweise anzeigen!",
     "editable": true
 }:demo
 
@@ -55,6 +59,10 @@ Für das obrige Beispiel haben wir den folgenden JSON Block verwendet:
             "demo.css",
             "demo.js"
         ],
+        "links": {
+            "Ausgehender Link": "http://google.de"
+        },
+        "notice": "Ich kann sogar ausblendbare Hinweise anzeigen!",
         "editable": true
     }:demo
 
@@ -65,6 +73,13 @@ sucht, um sie als Ergebnis-Dokument darzustellen.
 
 Der `display` Array gibt an, welche Dateien aus dem Ordner dem User mit Quelltextansicht gezeigt
 werden sollen.
+
+Du kannst einen, oder mehrere ausgehende Links im `links` Objekt definieren. Verwende den Objekt-Key als
+Beschriftung für den Link Button. In den Wert trägst du die Ziel-URL ein.
+
+Wenn du einen kleinen Hinweis in deinem Beispiel anzeigen möchtest (zum Beispiel was zu tun ist um eine
+Aktion auszulösen), setze die `notice` Eigenschaft mit einem String. Der Hinweis wird über der Demo-Ansicht
+angezeigt und kann mit einem Klick ausgeblendet werden.
 
 Die `editable` Eigenschaft definiert, ob ein Besucher die Möglichkeit haben soll den angezeigten Quellcode
 zu bearbeiten, oder nicht. Damit bearbeitbare Beispiele funktionieren musst du sicherstellen das DocEngine

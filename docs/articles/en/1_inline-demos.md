@@ -41,6 +41,10 @@ demo:{
         "demo.css",
         "demo.js"
     ],
+     "links": {
+         "An Outlink": "http://google.com"
+     },
+     "notice": "I can even show a dismissable notice!",
     "editable": true
 }:demo
 
@@ -56,6 +60,10 @@ For the above demo, we used the following JSON block:
             "demo.css",
             "demo.js"
         ],
+        "links": {
+            "An Outlink": "http://google.com"
+        },
+        "notice": "I can even show a dismissable notice!",
         "editable": true
     }:demo
 
@@ -66,6 +74,13 @@ it as the result document.
 
 The `display` array specifies which files from the folder should be displayed to the user
 in a source window.
+
+You can define one or more outbound links in the `links` object. Use the object key as the
+label text of the button and the value for the URL.
+
+If you want to display a little notice inside the demo (for example what to do to trigger an action),
+set the `notice` property with a string. The notice is displayed on top of the demo view and can be
+dismissed with a click.
 
 The `editable` property defines if a user should be able to modify the displayed code in the
 source windows, or not. In order to make editable demos work, you need to make sure that docEngine
