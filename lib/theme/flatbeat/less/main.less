@@ -126,12 +126,32 @@ code {
     font-size: 12px;
 }
 
-.wgt-language {
+.headButtons {
     position: absolute;
     right: 20px;
-    height: 40px;
     top: 50%;
     margin-top: -20px;
+    text-align: right;
+
+    .mobileNavigation {
+        display: none;
+        height: 40px;
+        width: 50px;
+        border: none;
+        cursor: pointer;
+        vertical-align: top;
+        background: #fff url(../img/icon-mobileMenu.png) no-repeat center;
+        outline: none;
+
+        &:hover {
+            background-color: #ddd;
+        }
+    }
+}
+
+.wgt-language {
+    height: 40px;
+    display: inline-block;
 
     .available-languages {
         display: none;
@@ -205,15 +225,15 @@ code {
         font-size: 1.5em;
     }
 
-    h4{
+    h4 {
         font-size: 1.2em;
     }
 
-    h5{
+    h5 {
         font-size: 1em;
     }
 
-    h6{
+    h6 {
         font-size: 1em;
         color: #777;
     }
@@ -241,7 +261,7 @@ code {
             font-weight: normal;
         }
 
-        code{
+        code {
             line-height: 1.2em;
         }
     }
@@ -281,11 +301,11 @@ code {
                 color: #a584ac;
                 margin-right: 3px;
 
-                &:focus{
+                &:focus {
                     position: relative;
                     color: #000;
 
-                    &:before{
+                    &:before {
                         content: "▶";
                         position: absolute;
                         top: -15px;
@@ -296,12 +316,12 @@ code {
                 }
             }
 
-            .type{
+            .type {
                 font-size: 0.8em;
                 color: #aaa;
                 font-weight: normal;
 
-                &:before{
+                &:before {
                     content: ":";
                     margin-left: 3px;
                     margin-right: 3px;
@@ -317,7 +337,7 @@ code {
         background: #fff;
         box-shadow: 0 1px 3px rgba(0, 0, 0, .13);
 
-        span{
+        span {
             font-size: 14px;
             color: #000;
         }
@@ -380,7 +400,6 @@ code {
                 font-size: 14px;
                 cursor: pointer;
                 font-weight: 200;
-
 
                 &:hover {
                     background: #eee;

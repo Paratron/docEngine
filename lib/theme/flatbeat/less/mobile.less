@@ -7,6 +7,67 @@ and (max-device-width: 480px) {
         width: auto;
     }
 
+    .header{
+        padding-bottom: 5px;
+
+        .logo{
+            font-size: 1.5em;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .version{
+            font-size: 0.8em;
+            display: inline-block;
+        }
+
+        .headButtons{
+            position: static;
+            display: block;
+            clear: left;
+            margin-top: 0;
+
+            .mobileNavigation{
+                display: block;
+                position: absolute;
+                top: 0;
+                right: 0;
+            }
+
+            .wgt-language{
+                display: none;
+                margin-left: -20px;
+                margin-right: -20px;
+                padding-left: 20px;
+                border-top: #a584ac solid 1px;
+                border-bottom: #a584ac solid 1px;
+                padding-top: 10px;
+                height: auto;
+                padding-bottom: 10px;
+                margin-bottom: -10px;
+
+                button{
+                    display: none;
+                }
+
+                .available-languages{
+                    display: block;
+                    position: static;
+                    width: auto;
+                    text-align: left;
+                    background: transparent;
+                    border: none;
+                    box-shadow: none;
+
+                    a{
+                        display: inline-block;
+                        font-size: 14px;
+                    }
+                }
+            }
+        }
+    }
+
     .body {
         padding: 0;
 
@@ -14,11 +75,34 @@ and (max-device-width: 480px) {
             float: none;
             width: auto;
             box-shadow: none;
+            display: none;
         }
 
         .content{
             margin: 0;
             padding: 20px;
         }
+    }
+
+    .content{
+        h1{
+            font-size: 1.5em;
+        }
+
+        h2{
+            font-size: 1.3em;
+        }
+
+        h3{
+            font-size: 1.1em;
+        }
+
+        h4, h5, h6{
+            font-size: 1em;
+        }
+    }
+
+    .footer{
+        font-size: 12px;
     }
 }
