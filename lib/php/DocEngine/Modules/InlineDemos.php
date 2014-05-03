@@ -86,6 +86,18 @@ class InlineDemos {
 
         $demoConfig = $_SESSION[$sandboxId];
 
+        if(!isset($demoConfig['display'])){
+            $demoConfig['display'] = array();
+        }
+
+        if(!isset($demoConfig['links'])){
+            $demoConfig['links'] = array();
+        }
+
+        if(!isset($demoConfig['notice'])){
+            $demoConfig['notice'] = '';
+        }
+
         $fileData = '';
 
         foreach ($demoConfig['display'] as $file) {
