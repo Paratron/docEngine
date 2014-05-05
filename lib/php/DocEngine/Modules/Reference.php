@@ -77,7 +77,7 @@ class Reference {
 
             $html .= '<span class="type">' . $definitionType . '</span>';
 
-            $content = str_replace($matches[2][$k], $html, $content);
+            $content = str_replace('>' . $matches[2][$k] . '<', '>' . $html . '<', $content);
         }
 
         $moduleSettings = $docEngine->mainConfig->modules->Reference->quickNavigation;
