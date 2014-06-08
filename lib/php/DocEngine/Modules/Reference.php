@@ -75,7 +75,9 @@ class Reference {
                 $html .= '(<span>' . implode(', ', $parameters) . '</span>)';
             }
 
-            $html .= '<span class="type">' . $definitionType . '</span>';
+            if($definitionType){
+                $html .= '<span class="type">' . $definitionType . '</span>';
+            }
 
             $content = str_replace('>' . $matches[2][$k] . '<', '>' . $html . '<', $content);
         }
