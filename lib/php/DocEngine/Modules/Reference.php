@@ -65,7 +65,9 @@ class Reference {
                 $groups[$c][] = array(
                     'title' => $definitionName,
                     'link' => '#' . $definitionLink,
-                    'classes' => implode(' ', $classes)
+                    'classes' => implode(' ', $classes),
+                    'parameters' => $parameters,
+                    'type' => $definitionType
                 );
             }
 
