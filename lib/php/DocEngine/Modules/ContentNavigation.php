@@ -22,6 +22,10 @@ class ContentNavigation {
      * @param $content
      */
     public static function scan($content){
+		if (!static::$conf['active']) {
+			return $content;
+		}
+
         global $docEngine;
 
         if($docEngine->currentPage['type'] === 'reference'){
