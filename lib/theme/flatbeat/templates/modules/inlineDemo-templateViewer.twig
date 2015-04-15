@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base href="{{ basePath }}en/module/demofiles/{{ sandboxId }}/">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="../../../../{{ themeFolder }}/css/inlineDemo.css" type="text/css" rel="stylesheet" media="screen">
+    <title>DocEngine inline demo</title>
+</head>
+<body>
+<script>
+    var basePath = '{{ basePath }}';
+    var sandboxId = '';
+    var editable = false;
+    var lang = {{ lang }};
+</script>
+{{ fileData }}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="../../../../{{ themeFolder }}/js/modules/inlineDemo/underscore-min.js"></script>
+<script src="../../../../{{ themeFolder }}/js/modules/inlineDemo/backbone-min.js"></script>
+<script src="../../../../{{ themeFolder }}/js/modules/inlineDemo/ace/ace.js"></script>
+<script src="../../../../{{ themeFolder }}/js/modules/inlineDemo/modo-0.13-custom.min.js"></script>
+<script src="../../../../{{ themeFolder }}/js/modules/inlineDemo/modo-aceeditor.js"></script>
+
+<script>
+    window.addEventListener('message', function(msg){
+        msg = JSON.parse(msg);
+        window.demoTarget = msg.target;
+        window.files = msg.display;
+        window.links = msg.links;
+        window.notice = msg.notice;
+        var s = document.createElement('script');
+        s.src = '../../../../{{ themeFolder }}/js/modules/inlineDemo/gear.js';
+        document.body.appendChild(s);
+    });
+</script>
+</body>
+</html>

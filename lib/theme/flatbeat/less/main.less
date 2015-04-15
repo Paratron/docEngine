@@ -278,6 +278,34 @@ code {
         border: none;
         background: transparent;
     }
+
+	.wgt-contentnavigation{
+		border-left: #ccc solid 5px;
+		padding: 5px;
+		padding-left: 10px;
+
+		ul{
+			padding: 0;
+			margin: 0;
+		}
+
+		li{
+			display: block;
+			margin-bottom: 5px;
+
+			&:last-child{
+				margin-bottom: 0;
+			}
+		}
+
+		a{
+			text-decoration: none;
+
+			&:hover{
+				color: #a584ac;
+			}
+		}
+	}
 }
 
 .reference {
@@ -413,6 +441,14 @@ code {
             }
         }
     }
+}
+
+@media only screen
+and (max-width: 1024px){
+	.body{
+		width: 100%;
+		box-sizing: border-box;
+	}
 }
 
 @import "mobile.less";

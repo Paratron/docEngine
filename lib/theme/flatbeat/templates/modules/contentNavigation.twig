@@ -1,0 +1,9 @@
+<div class="wgt-contentnavigation">
+    <ul>
+        {% for item in items %}
+            <li>
+                <a href="#{{ item.anchor }}" class="level-{{ item.level }}">{{ item.title }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
