@@ -119,6 +119,44 @@ library is being loaded into the page via `$docEngine->addJavascriptFile()`.
 The modified result is returned at the end of the method so docEngine can finish rendering the page and display
 it to the user. It wasn't that complicated, wasn't it?
 
+##Available hooks
+The hooks system works very similar to the event system in other programming languages. Hooks are being called
+at certain points in the program flow and modules can register methods against hooks to be called from elsewhere.
+Modules can even call hooks themselves by calling `$docEngine->callHook('hookname', $modificator)` where `$modificator` is
+a property that gets passed to ALL methods registered to this hook. If all hooks have been called, the final modificator
+property is returned from the `callHook()` method. This approach enables several modules to modify the same content before
+its getting rendered.
+
+This is the current list of system hooks, being called in the page generation flow (in this order):
+
+- __modulesLoaded__    
+  First hook to be called right after the loading of all module classes. Page generation might be canceled after this
+  point, since the routing hasn't been done.
+- __routingFinished__    
+  Called after docEngine has analyzed if there is any possible content to be displayed for the requested URL. This means
+  language detections and/or page redirects have already been made. After this point, docEngine will build the local and global
+  config objects and will define the module config objects if any presets have been made in the global config file. Gets the 
+  generated page object passed in.
+- __contentUnparsed__    
+  Called before the markdown content area is being parsed and transformed into HTML. Gets the markdown code passed in. 
+- __contentParsed__    
+  Called after the markdown content area has been parsed to HTML. Gets the final HTML result passed in.
+- __beforeRender__    
+  Called before the parsed content is passed to the twig theme file and the final page being rendered.
+- __afterRender__
+  Called after the final page has been rendered. Gets the final HTML result passed in, right before its handed to the browser.
+  
+###Special hooks
+
+- __module:[directHook]__    
+  See [module exclusive page routing](#exclusive-routing)
+- __renderHeader__    
+  Called from within the default theme during the final page rendering. Gets a string passed in. Modify the string if you want
+  to add something to the theme header.
+- __renderFooter__    
+  Called from within the default theme during the final page rendering. Gets a string passed in. Modify the string if you want
+  to add something to the theme footer.
+
 
 ##Module configuration
 You most certainly already noticed the `$conf` property of the module. This is where you can set some
@@ -139,10 +177,10 @@ This is useful if you want to disable some modules for certain pages completely 
 or want to use different skins, or whatever.
 
 
-##Module exclusive page routing
+##Module exclusive page routing {#exclusive-routing}
 If you need to output some module-data and nothing else, you can utilize the following route:
 
-    /module/myCoolHook/what/ever/you/want
+    /{lang}/module/myCoolHook/what/ever/you/want
 
 The `/module` route is reserved for direct-to-module calls inside docEngine, so calling this route will
 trigger a hook and no theme template is being rendered around any data you echo to the browser.

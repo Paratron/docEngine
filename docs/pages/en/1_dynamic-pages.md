@@ -26,3 +26,5 @@ global or local config, or use them to show/hide different parts of your pages. 
 A little example. The variable `time` is set in PHP:
 
     The current server time is: {{ vars.time }}
+
+For a better understanding, look up the source of this page (both the PHP and markdown file) [on github](https://github.com/Paratron/DocEngine/tree/master/docs/pages/en).

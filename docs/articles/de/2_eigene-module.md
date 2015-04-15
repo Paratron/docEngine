@@ -143,7 +143,7 @@ or want to use different skins, or whatever.
 ##Module exclusive page routing
 If you need to output some module-data and nothing else, you can utilize the following route:
 
-    /module/myCoolHook/what/ever/you/want
+    /{lang}/module/myCoolHook/what/ever/you/want
 
 The `/module` route is reserved for direct-to-module calls inside docEngine, so calling this route will
 trigger a hook and no theme template is being rendered around any data you echo to the browser.

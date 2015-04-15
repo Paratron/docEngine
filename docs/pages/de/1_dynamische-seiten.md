@@ -22,3 +22,5 @@ Es liegt ganz bei Ihnen.
 Ein kleines Beispiel. Die Variable `time` wird in PHP gesetzt:
 
     Die aktuelle Serverzeit ist: {{ vars.time }}
+
+Zum besseren Verständnis, sollten Sie sich den Quelltext dieser Seite (sowohl PHP als auch Markdown) [auf github ansehen](https://github.com/Paratron/DocEngine/tree/master/docs/pages/de).

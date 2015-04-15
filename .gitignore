@@ -1,3 +1,4 @@
 .idea
 lib/cache/*
 !lib/cache/.htaccess
+static

@@ -17,3 +17,6 @@ The current feature set includes:
 - Theme-ability (themes utilize the powerful [Twig templating engine](http://twig.sensiolabs.org/))
 - Custom modules
 - Embedded, interactive demos
+
+> __Heads up!__    
+> This documentation is unfinished.
