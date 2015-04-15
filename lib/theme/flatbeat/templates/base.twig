@@ -11,13 +11,13 @@
           type='text/css'>
     <link href="../../{{ docEngine.themeFolder }}/css/main.css" type="text/css" rel="stylesheet" media="screen">
     {% for file in docEngine.cssFiles %}
-        <link href="{% if file.local %}../../{{ docEngine.themeFolder }}/css/{{ file.url }}{% else %}{{ file.url }}{% endif %}"
+        <link href="{% if file.local %}../..{% if file.inTheme %}/{{ docEngine.themeFolder }}/css/{% endif %}{{ file.url }}{% else %}{{ file.url }}{% endif %}"
               type="text/css" rel="stylesheet" media="{{ file.media }}">
     {% endfor %}
     <title>{{ docEngine.mainConfig.title }} - {{ config.title }}</title>
     {% for file in docEngine.headerJavaScriptFiles %}
         <script type="text/javascript"
-                src="{% if file.local %}{{ docEngine.themeFolder }}/js/{{ file.url }}{% else %}{{ file.url }}{% endif %}"></script>
+                src="{% if file.local %}../..{% if file.inTheme %}/{{ docEngine.themeFolder }}/js/{%  endif %}{{ file.url }}{% else %}{{ file.url }}{% endif %}"></script>
     {% endfor %}
 </head>
 <body class="{{ docEngine.currentPage.type }}">
@@ -136,5 +136,9 @@
         });
     })();
 </script>
+{% for file in docEngine.footerJavaScriptFiles %}
+    <script type="text/javascript"
+            src="{% if file.local %}../..{% if file.inTheme %}/{{ docEngine.themeFolder }}/js/{%  endif %}{{ file.url }}{% else %}{{ file.url }}{% endif %}"></script>
+{% endfor %}
 </body>
 </html>

@@ -720,7 +720,8 @@ class DocEngine {
      */
     function addCSSFile($url, $media = 'screen') {
         $cssFile = array(
-                'local' => !(substr($url, 0, 5) == 'http:' || substr($url, 0, 6) == 'https:'),
+                'local' => !(substr($url, 0, 5) == 'http:' || substr($url, 0, 6) == 'https:' || substr($url, 0, 2) == '//'),
+				'inTheme' => substr($url, 0, 1) != '/' && substr($url, 1, 1) !== '/',
                 'url' => $url,
                 'media' => $media
         );
@@ -735,7 +736,8 @@ class DocEngine {
      */
     function addJavascriptFile($url, $header = FALSE) {
         $jsFile = array(
-                'local' => !(substr($url, 0, 5) == 'http:' || substr($url, 0, 6) == 'https:'),
+                'local' => !(substr($url, 0, 5) == 'http:' || substr($url, 0, 6) == 'https:' || substr($url, 0, 2) == '//'),
+				'inTheme' => substr($url, 0, 1) != '/' && substr($url, 1, 1) !== '/',
                 'url' => $url
         );
 
