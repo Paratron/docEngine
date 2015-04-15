@@ -53,6 +53,10 @@ class ContentNavigation {
 			);
 		}
 
+		if(!count($subNavigation)){
+			return $content;
+		}
+
 		$twig = $docEngine->getTwigStringInstance();
 
 		$template = $docEngine->themeFolder . '/templates/modules/contentNavigation.twig';
