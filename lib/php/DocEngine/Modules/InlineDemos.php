@@ -10,191 +10,202 @@
  */
 class InlineDemos {
 
-    /**
-     * Tells docEngine which methods to call when.
-     * @var array
-     */
-    static $hooks = array(
-            'contentUnparsed' => 'embedDemos',
-            'module:demo' => 'inlineDemo',
-            'module:demofiles' => 'fileServer',
-            'module:demopulse' => 'pulse'
-    );
+	/**
+	 * Tells docEngine which methods to call when.
+	 * @var array
+	 */
+	static $hooks = array(
+			'contentUnparsed' => 'embedDemos',
+			'module:demo' => 'inlineDemo',
+			'module:demofiles' => 'fileServer',
+			'module:demopulse' => 'pulse'
+	);
 
-    static $conf = array(
-            'active' => TRUE
-    );
+	static $conf = array(
+			'active' => TRUE
+	);
 
-    /**
-     * Adds the prettify library to be loaded in the page header.
-     */
-    public static function embedDemos($content) {
-        if (!static::$conf['active']) {
-            return $content;
-        }
+	/**
+	 * Adds the prettify library to be loaded in the page header.
+	 */
+	public static function embedDemos($content) {
+		if (!static::$conf['active']) {
+			return $content;
+		}
 
-        global $docEngine;
-        session_start();
+		global $docEngine;
+		if (!$docEngine->staticBuildInProgress) {
+			session_start();
 
-        if(!is_dir('lib/cache/sandbox')){
-            mkdir('lib/cache/sandbox');
-            mkdir('lib/cache/sandbox/open');
-        } else {
-            $openSessions = scandir('lib/cache/sandbox/open');
-            array_shift($openSessions);
-            array_shift($openSessions);
-            foreach($openSessions as $s){
-                if(filemtime('lib/cache/sandbox/open/' . $s) < time() - 60){
-                    $sessFiles = glob('lib/cache/sandbox/' . $s . '_*');
-                    foreach($sessFiles as $f){
-                        unlink($f);
-                    }
-                    unlink('lib/cache/sandbox/open/' . $s);
-                }
-            }
-        }
-
-
-        while ($demoTag = $docEngine->readJSONBlock($content, 'demo', TRUE, TRUE)) {
-            $json = $demoTag['json'];
-            $sandboxId = uniqid('');
-
-            $json['languageTransfer'] = $docEngine->language;
-
-            $_SESSION[$sandboxId] = $json;
-
-            touch('lib/cache/sandbox/open/' . $sandboxId);
-
-            $html = '<iframe class="inlineDemo" src="../module/demo/' . $sandboxId . '/' . $json['target'] . '"></iframe>';
-
-            $content = substr_replace($content, $html, $demoTag['start'], $demoTag['end'] - $demoTag['start']);
-        }
-
-        return $content;
-    }
+			if (!is_dir('lib/cache/sandbox')) {
+				mkdir('lib/cache/sandbox');
+				mkdir('lib/cache/sandbox/open');
+			}
+			else {
+				$openSessions = scandir('lib/cache/sandbox/open');
+				array_shift($openSessions);
+				array_shift($openSessions);
+				foreach ($openSessions as $s) {
+					if (filemtime('lib/cache/sandbox/open/' . $s) < time() - 60) {
+						$sessFiles = glob('lib/cache/sandbox/' . $s . '_*');
+						foreach ($sessFiles as $f) {
+							unlink($f);
+						}
+						unlink('lib/cache/sandbox/open/' . $s);
+					}
+				}
+			}
+		}
 
 
-    public static function inlineDemo($urlParams) {
-        session_start();
+		while ($demoTag = $docEngine->readJSONBlock($content, 'demo', TRUE, TRUE)) {
+			$json = $demoTag['json'];
+			$sandboxId = uniqid('');
 
-        $sandboxId = array_shift($urlParams);
-        $demoName = implode('/', $urlParams);
+			$json['languageTransfer'] = $docEngine->language;
 
-        if (!isset($_SESSION[$sandboxId])) {
-            die('Undefined demo');
-        }
+			if (!$docEngine->staticBuildInProgress) {
+				$_SESSION[$sandboxId] = $json;
 
-        $demoConfig = $_SESSION[$sandboxId];
+				touch('lib/cache/sandbox/open/' . $sandboxId);
 
-        if(!isset($demoConfig['display'])){
-            $demoConfig['display'] = array();
-        }
+				$html = '<iframe class="inlineDemo" src="../module/demo/' . $sandboxId . '/' . $json['target'] . '"></iframe>';
+			} else {
+				$html = '<iframe id="demo' . $sandboxId . '" class="inlineDemo" src="../../demos/demoviewer.html"></iframe>';
+				$html .= '<script>document.getElementById("demo' . $sandboxId . '").contentWindow.postMessage(\'' . json_encode($json) . '\');</script>';
+			}
 
-        if(!isset($demoConfig['links'])){
-            $demoConfig['links'] = array();
-        }
+			$content = substr_replace($content, $html, $demoTag['start'], $demoTag['end'] - $demoTag['start']);
+		}
 
-        if(!isset($demoConfig['notice'])){
-            $demoConfig['notice'] = '';
-        }
+		return $content;
+	}
 
-        $fileData = '';
 
-        foreach ($demoConfig['display'] as $file) {
-            if (!file_exists('docs/demos/' . $demoName . '/' . $file)) {
-                die('Cannot read file to display: ' . $file);
-            }
-            $fileContent = file_get_contents('docs/demos/' . $demoName . '/' . $file);
-            $fileN = str_replace(array('.', '/'), '_', $file);
-            $fileData .= '<script type="text/html" id="file_' . $fileN . '">' . str_replace(array(
-                            '<',
-                            '>'
-                    ), array(
-                            '%-gts-%',
-                            '%-lts-%'
-                    ), $fileContent) . '</script>';
-        }
+	public static function inlineDemo($urlParams) {
+		session_start();
 
-        global $docEngine;
+		$sandboxId = array_shift($urlParams);
+		$demoName = implode('/', $urlParams);
 
-        require 'lib/php/Kiss/Utils.php';
+		if (!isset($_SESSION[$sandboxId])) {
+			die('Undefined demo');
+		}
 
-        $docEngine->language = $demoConfig['languageTransfer'];
-        $lang = $docEngine->readLanguage();
+		$demoConfig = $_SESSION[$sandboxId];
 
-        $dta = array(
-                'sandboxId' => $sandboxId,
-                'editable' => isset($demoConfig['editable']) ? ($demoConfig['editable'] ? 'true' : 'false') : 'false',
-                'target' => $docEngine->mainConfig->basePath . $docEngine->language . '/module/demofiles/' . $sandboxId . '/',
-                'basePath' => $docEngine->mainConfig->basePath,
-                'themeFolder' => $docEngine->themeFolder,
-                'files' => json_encode($demoConfig['display']),
-                'links' => json_encode($demoConfig['links']),
-                'notice' => $demoConfig['notice'],
-                'fileData' => $fileData,
-                'lang' => json_encode($lang['modules']['inlineDemo'])
-        );
+		if (!isset($demoConfig['display'])) {
+			$demoConfig['display'] = array();
+		}
 
-        die(\Kiss\Utils::template('@file::' . $docEngine->themeFolder . '/templates/modules/inlineDemo.twig', $dta));
-    }
+		if (!isset($demoConfig['links'])) {
+			$demoConfig['links'] = array();
+		}
 
-    public static function fileServer($urlParams) {
-        session_start();
+		if (!isset($demoConfig['notice'])) {
+			$demoConfig['notice'] = '';
+		}
 
-        $sandboxId = array_shift($urlParams);
-        $filePath = implode('/', $urlParams);
+		$fileData = '';
 
-        if (!$filePath) {
-            $filePath = 'index.html';
-        }
+		foreach ($demoConfig['display'] as $file) {
+			if (!file_exists('docs/demos/' . $demoName . '/' . $file)) {
+				die('Cannot read file to display: ' . $file);
+			}
+			$fileContent = file_get_contents('docs/demos/' . $demoName . '/' . $file);
+			$fileN = str_replace(array(
+					'.',
+					'/'
+			), '_', $file);
+			$fileData .= '<script type="text/html" id="file_' . $fileN . '">' . str_replace(array(
+							'<',
+							'>'
+					), array(
+							'%-gts-%',
+							'%-lts-%'
+					), $fileContent) . '</script>';
+		}
 
-        if (!isset($_SESSION[$sandboxId])) {
-            die('Unknown sandbox');
-        }
+		global $docEngine;
 
-        $demoConfig = $_SESSION[$sandboxId];
+		require 'lib/php/Kiss/Utils.php';
 
-        $fileName = 'docs/demos/' . $demoConfig['target'] . $filePath;
-        $fileId = $sandboxId . '_' . md5($fileName);
+		$docEngine->language = $demoConfig['languageTransfer'];
+		$lang = $docEngine->readLanguage();
 
-        if (!file_exists($fileName)) {
-            die('File not found :(');
-        }
+		$dta = array(
+				'sandboxId' => $sandboxId,
+				'editable' => isset($demoConfig['editable']) ? ($demoConfig['editable'] ? 'true' : 'false') : 'false',
+				'target' => $docEngine->mainConfig->basePath . $docEngine->language . '/module/demofiles/' . $sandboxId . '/',
+				'basePath' => $docEngine->mainConfig->basePath,
+				'themeFolder' => $docEngine->themeFolder,
+				'files' => json_encode($demoConfig['display']),
+				'links' => json_encode($demoConfig['links']),
+				'notice' => $demoConfig['notice'],
+				'fileData' => $fileData,
+				'lang' => json_encode($lang['modules']['inlineDemo'])
+		);
 
-        //User setting data!
-        if (isset($demoConfig['editable']) && $demoConfig['editable'] && isset($_POST['data'])) {
-            file_put_contents('lib/cache/sandbox/' . $fileId, $_POST['data']);
-            die('1');
-        }
+		die(\Kiss\Utils::template('@file::' . $docEngine->themeFolder . '/templates/modules/inlineDemo.twig', $dta));
+	}
 
-        require 'lib/php/Kiss/Utils.php';
+	public static function fileServer($urlParams) {
+		session_start();
 
-        header('Content-Type: ' . \Kiss\Utils::getMimeType($filePath));
-        header('Pragma: no-cache');
-        header('Cache-Control: no-cache');
+		$sandboxId = array_shift($urlParams);
+		$filePath = implode('/', $urlParams);
 
-        if (file_exists('lib/cache/sandbox/' . $fileId)) {
-            header('Content-Length: ' . filesize('lib/cache/sandbox/' . $fileId));
-            readfile('lib/cache/sandbox/' . $fileId);
-            die();
-        }
+		if (!$filePath) {
+			$filePath = 'index.html';
+		}
 
-        header('Content-Length: ' . filesize($fileName));
-        readfile($fileName);
-        die();
-    }
+		if (!isset($_SESSION[$sandboxId])) {
+			die('Unknown sandbox');
+		}
 
-    public static function pulse($urlParams){
-        session_start();
+		$demoConfig = $_SESSION[$sandboxId];
 
-        $sandboxId = array_shift($urlParams);
+		$fileName = 'docs/demos/' . $demoConfig['target'] . $filePath;
+		$fileId = $sandboxId . '_' . md5($fileName);
 
-        if(isset($_SESSION[$sandboxId])){
-            touch('lib/cache/sandbox/open/' . $sandboxId);
-            die('1');
-        }
+		if (!file_exists($fileName)) {
+			die('File not found :(');
+		}
 
-        die('0');
-    }
+		//User setting data!
+		if (isset($demoConfig['editable']) && $demoConfig['editable'] && isset($_POST['data'])) {
+			file_put_contents('lib/cache/sandbox/' . $fileId, $_POST['data']);
+			die('1');
+		}
+
+		require 'lib/php/Kiss/Utils.php';
+
+		header('Content-Type: ' . \Kiss\Utils::getMimeType($filePath));
+		header('Pragma: no-cache');
+		header('Cache-Control: no-cache');
+
+		if (file_exists('lib/cache/sandbox/' . $fileId)) {
+			header('Content-Length: ' . filesize('lib/cache/sandbox/' . $fileId));
+			readfile('lib/cache/sandbox/' . $fileId);
+			die();
+		}
+
+		header('Content-Length: ' . filesize($fileName));
+		readfile($fileName);
+		die();
+	}
+
+	public static function pulse($urlParams) {
+		session_start();
+
+		$sandboxId = array_shift($urlParams);
+
+		if (isset($_SESSION[$sandboxId])) {
+			touch('lib/cache/sandbox/open/' . $sandboxId);
+			die('1');
+		}
+
+		die('0');
+	}
 }
  

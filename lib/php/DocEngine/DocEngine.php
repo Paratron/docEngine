@@ -106,17 +106,29 @@ class DocEngine {
      */
     private $twigStringCache = NULL;
 
-    function __construct() {
+    /**
+     * This property will be true, if a static build is being made currently.
+     * @var bool
+     */
+    var $staticBuildInProgress = FALSE;
+
+    function __construct($docsFolder = NULL) {
+        if($docsFolder == NULL){
+            $docsFolder = 'docs/';
+        }
+
         //First, lets read the docEngine config.
-        $this->mainConfig = json_decode(file_get_contents('docs/docEngine_config.json'));
+        $this->mainConfig = json_decode(file_get_contents($docsFolder . 'docEngine_config.json'));
 
         if (!$this->mainConfig) {
             throw new \ErrorException('DocEngine Main Config file damaged!');
         }
 
-        $this->readFileStructure();
+        $this->readFileStructure($docsFolder);
 
         $this->loadModules();
+
+        $this->themeFolder = 'lib/theme/' . $this->mainConfig->theme;
     }
 
     /**
@@ -136,13 +148,62 @@ class DocEngine {
         return $twig;
     }
 
-    function init() {
+    /**
+     * Will render all available documents into the given directory.
+     * @param $targetDirectory
+     */
+    function buildStatic($targetDirectory){
+        echo 'Starting a static build to ' . $targetDirectory . '...' . "\n";
+        if(substr($targetDirectory, -1) !== '/'){
+            $targetDirectory .= '/';
+        }
+
+        $this->staticBuildInProgress = TRUE;
+
+        global $twig;
+
+        foreach($this->fileStructure as $file){
+            echo 'Rendering ' . $file['url'] . "\n";
+
+            $this->init('/' . $file['url']);
+            $this->callHook('beforeRender');
+
+            $result = $twig->render('base.twig', array(
+                    'docEngine' => $this,
+                    'lang' => $this->readLanguage(),
+                    'config' => $this->localConfig
+            ));
+
+            $result = $this->callHook('afterRender', $result);
+
+            if(!file_exists($targetDirectory . $file['lang'])){
+                mkdir($targetDirectory . $file['lang']);
+            }
+
+            if(!file_exists($targetDirectory . $file['lang'] . '/' . $file['type'])){
+                mkdir($targetDirectory . $file['lang'] . '/' . $file['type']);
+            }
+
+            file_put_contents($targetDirectory . $file['url'], $result);
+        }
+
+        mkdir($targetDirectory . 'lib/');
+        mkdir($targetDirectory . 'lib/theme/');
+        mkdir($targetDirectory . $this->themeFolder);
+    }
+
+    /**
+     * Initializes docEngine, handles the routing, creates the document.
+     */
+    function init($url = NULL) {
         $this->callHook('modulesLoaded');
 
-        $this->themeFolder = 'lib/theme/' . $this->mainConfig->theme;
+        if(!$url && isset($_SERVER['PATH_INFO'])){
+            $url = $_SERVER['PATH_INFO'];
+        }
 
-        if (isset($_SERVER['PATH_INFO'])) {
-            $this->requestParams = explode('/', $_SERVER['PATH_INFO']);
+        if ($url) {
+            $this->requestParams = explode('/', $url);
             array_shift($this->requestParams);
         }
         else {
@@ -423,8 +484,9 @@ class DocEngine {
         }
     }
 
-    private function readFileStructure() {
-        $files = glob('docs/{articles,pages,reference}/*/*.md', GLOB_BRACE);
+    private function readFileStructure($docsFolder) {
+
+        $files = glob($docsFolder . '{articles,pages,reference}/*/*.md', GLOB_BRACE);
 
         $struct = array();
         $keyStructRef = array();
@@ -475,6 +537,16 @@ class DocEngine {
         $this->fileStructure = $struct;
         $this->keyFileStructureReference = $keyStructRef;
     }
+
+	/**
+	 * This method updates the urls of the file structure to be compatible with the statically generated output.
+	 */
+	function makeStaticFileStructure(){
+		foreach($this->fileStructure as $k => $v){
+			$this->fileStructure[$k]['url'] .= '.html';
+			$this->fileStructure[$k]['relativeUrl'] .= '.html';
+		}
+	}
 
     private function readConfigFromFile($fileName) {
         if (!file_exists($fileName)) {
