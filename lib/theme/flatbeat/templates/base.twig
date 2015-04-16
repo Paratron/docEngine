@@ -82,7 +82,7 @@
                 {{ docEngine.content|raw }}
             </div>
             <div class="content-discussion">
-                {% if docEngine.mainConfig.disqus %}
+                {% if docEngine.mainConfig.disqus and not (config.disqus is defined and config.disqus == false) %}
                     <div id="disqus_thread"></div>
                     <script type="text/javascript">
                         /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
